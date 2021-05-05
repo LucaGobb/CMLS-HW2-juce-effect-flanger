@@ -100,11 +100,11 @@ void StereoFlangerAudioProcessorEditor::resized()
     feedbackLabel.setBounds (10, 130, 90, 20);
     feedbackSlider.setBounds (100, 130, getWidth() - 110, 20);
 
-    freqLabel.setBounds (10, 90, 90, 20);
-    freqSlider.setBounds (100, 90, getWidth() - 110, 20);
+    freqLabel.setBounds (10, 170, 90, 20);
+    freqSlider.setBounds (100, 170, getWidth() - 110, 20);
 
-    widthLabel.setBounds (10, 90, 90, 20);
-    widthSlider.setBounds (100, 90, getWidth() - 110, 20);
+    widthLabel.setBounds (10, 210, 90, 20);
+    widthSlider.setBounds (100, 210, getWidth() - 110, 20);
 
 
 }
