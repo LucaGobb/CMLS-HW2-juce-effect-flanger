@@ -16,7 +16,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 {
 
     public:
-   
+
     StereoFlangerAudioProcessor();
     ~StereoFlangerAudioProcessor() override;
 
@@ -59,27 +59,27 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void set_ds(int val);
     void set_freq(float val);
     void set_width(float val);
-    
+
 
     private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessor)
-    
+
     juce::AudioSampleBuffer dbuf;
-    
-    int dw; 
-    int dr;
+
+    int dw;
+    float dr;
     int ds;
-    
+
     int fs;
-    
-    float wet;
+
+    float wet; // doto: do we need both?
     float dry;
     float feedback;
-    
+
     float phase;
     float T;
-    
+
     float freq;
     float width;
 };

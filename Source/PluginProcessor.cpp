@@ -63,7 +63,7 @@ double StereoFlangerAudioProcessor::getTailLengthSeconds() const
 
 int StereoFlangerAudioProcessor::getNumPrograms()
 {
-    return 1;   
+    return 1;
 }
 
 int StereoFlangerAudioProcessor::getCurrentProgram()
@@ -87,19 +87,20 @@ void StereoFlangerAudioProcessor::changeProgramName (int index, const juce::Stri
 //==============================================================================
 void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-   
-    dbuf.setSize(getTotalNumOutputChannels(), 100000);
-    dbuf.clear(); 
-    
+
+    dbuf.setSize(getTotalNumOutputChannels(), 100000); // todo: set the buffer dimension properly
+    dbuf.clear();
+
     dw = 0; //write pointer
-    dr = 1; //read pointer
-    ds = 50000; //dealy value
-    fs = 44100;
-    
-    feedback = 0.5; //feedback gain 
-    
+    // dr = 1; //read pointer
+    ds = 100000; //dealy value // todo: just make it equal to the buffer size
+    // fs = 44100;
+    fs = sampleRate; // todo: correct?
+
+    feedback = 0.5; //feedback gain
+
     phase = 0.0;
-    
+
 }
 
 void StereoFlangerAudioProcessor::releaseResources()
@@ -130,72 +131,82 @@ bool StereoFlangerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 }
 #endif
 
-void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+// todo: do we need midibuffer as input? or it is as default?
+// void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-    
+
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+      auto* channelData = buffer.getWritePointer (channel);
 
-    int numSamples= buffer.getNumSamples();
-    
-    
-    float wet_now = wet;
-    float dry_now = dry;
-    float fb_now = feedback;
-    int ds_now = ds;
-    
-    int 
-    
-    float* channelOutDataL = buffer.getWritePointer(0);
-    float* channelOutDataR = buffer.getWritePointer(1);
-    const float* channelInDataL = buffer.getReadPointer(0);
-    const float* channelInDataR = buffer.getReadPointer(1);
-    
-    dbuf.setSample(0, dw, channelInDataL[0]);
-    dbuf.setSample(1, dw, channelInDataR[0]);
-    
-    // Delay line
-    
-    for (int i=0; i<numSamples; ++i) {
-        
-        channelOutDataL[i] = dry_now * channelInDataL[i] + wet_now* dbuf.getSample(0, dr); 
-        channelOutDataR[i] = dry_now * channelInDataR[i] + wet_now* dbuf.getSample(1, dr);
-        
-        float interpolatedSample = 0.0;
-        float currentDelay = width * 0.5f + 0.5f * sinf(2.0 * M_PI * phase);
-        
-        // Linear interpolation
-        
-        dr = fmodf((float)dw - (float)(currentDelay * fs) + (float)ds - 3.0, (float)ds); 
-        
-        float fraction = dr = floorf(dr);
-        
-        int previousSample = (int)floorf(dr);
-        int nextSample = (previousSample + 1) % ds;
-        interpolatedSample = fraction * dbuf.getSample(0, nextSample) + (1.0f - fraction) * dbuf.getSample(0,previousSample);
-        
-        // Feedback
-        
-        dbuf.setSample(0, dw, channelInDataL[i] + dbuf.getSample(0, dr) * fb_now);
-        dbuf.setSample(1, dw, channelInDataR[i] + dbuf.getSample(1, dr) * fb_now);
-                
-        dw = (dw + 1 ) % ds_now;
-        dr = (dr + 1 ) % ds_now;
-        
-        //dbuf.setSample(0,dr,channelInDataL[i]) = interpolatedSample;
-        
-        phase += freq * T;
-        if(phase >= 1.0)
-            phase -= 1.0;
-    }
-        
+      int numSamples= buffer.getNumSamples();
+
+
+
+      float dry_now = dry;
+      // float wet_now = wet;
+      float wet_now = 1 - dry_now;
+      float fb_now = feedback;
+      int ds_now = ds;
+      // width_now is the sweep in sample
+      float width_now = wet * fs * 0.01; // todo: rename
+                                         // delaytimeMax : 10ms as pdf
+      float freq_now = freq;
+
+
+      float* channelOutDataL = buffer.getWritePointer(0);
+      float* channelOutDataR = buffer.getWritePointer(1);
+      const float* channelInDataL = buffer.getReadPointer(0);
+      const float* channelInDataR = buffer.getReadPointer(1);
+
+      dbuf.setSample(0, dw, channelInDataL[0]); // todo: cosa fa? copio il primo sample nel buffer di uscita?
+      dbuf.setSample(1, dw, channelInDataR[0]);
+
+      // Delay line
+      for (int i=0; i<numSamples; ++i) {
+
+          float interpolatedSample = 0.0;
+          float currentDelay = width_now * ( 0.5f + 0.5f * sinf(2.0 * M_PI * phase) );
+          // todo: add the minimum delay
+
+          // delay in sample
+          // todo: capire se width e quindi current delay li vogliamo normalizzati a 1 o misurati giá in samples
+          // todo: a cosa serve sto delay di 3 sample
+          dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 3.0, (float)ds);
+
+          // Linear interpolation
+          float fraction = dr - floorf(dr);
+          int previousSample = (int)floorf(dr);
+          int nextSample = (previousSample + 1) % ds;
+          interpolatedSample = fraction * dbuf.getSample(0, nextSample) + (1.0f - fraction) * dbuf.getSample(0,previousSample);
+          // todo: do it also for the right channel
+
+
+          // Feedback
+          // delayData[dpw] = in + (interpolatedSample * feedback_);
+          dbuf.setSample(0, dw, channelInDataL[i] + interpolatedSample * fb_now);
+          dbuf.setSample(1, dw, channelInDataR[i] + interpolatedSample * fb_now); //todo: stereo, change interpolatedSampleRIGHT
+
+          channelOutDataL[i] = dry_now * channelInDataL[i] + wet_now* interpolatedSample;
+          channelOutDataR[i] = dry_now * channelInDataR[i] + wet_now* interpolatedSample; // todo: stereoify
+
+          dw = (dw + 1 ) % ds_now;
+          // dr = (dr + 1 ) % ds_now;
+
+          //dbuf.setSample(0,dr,channelInDataL[i]) = interpolatedSample;
+
+          phase += freq_now / fs;
+          if(phase >= 1.0)
+              phase -= 1.0;
+      }
+
     }
 }
 
@@ -253,7 +264,7 @@ void StereoFlangerAudioProcessor::set_fb(float val)
 {
     feedback = val;
 }
-    
+
 
 void StereoFlangerAudioProcessor::set_freq(float val)
 {
@@ -264,5 +275,3 @@ void StereoFlangerAudioProcessor::set_width(float val)
 {
     width = val;
 }
-
-
