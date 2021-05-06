@@ -78,9 +78,9 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     float feedback; // Feedback gain
 
     float T;
-    
+
     float freq;
     float sweep; // Sweep Width (i.e. LFO amplitude)
     float phase; // Phase offset between L&R channels
-    int delayTime; // Minimum Delay Time
+    float delayTime; // Minimum Delay Time
 };

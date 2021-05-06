@@ -24,7 +24,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     addAndMakeVisible (dry_wetLabel);
 
     // delay Time
-    timeSlider.setRange (0, 5, 1);
+    timeSlider.setRange (0, 5, 0.1);
     timeSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     timeSlider.addListener(this);
     timeLabel.setText ("Delay time", juce::dontSendNotification);

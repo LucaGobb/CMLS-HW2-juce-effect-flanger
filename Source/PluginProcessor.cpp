@@ -150,15 +150,18 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     int numSamples= buffer.getNumSamples();
 
 
-    float dry_now = dry;
+    float dry_now = dry; // values: from 0 to 1
     // float wet_now = wet;
-    float wet_now = 1 - dry_now;
-    float fb_now = feedback;
+    // float wet_now = 1 - dry_now;
+    float fb_now = feedback; // 0 to 0.9
     int ds_now = ds;
     // width_now is the sweep in sample
-    float width_now = wet * fs * 0.01; // todo: rename
-                                       // delaytimeMax : 10ms as pdf
+    // sweep: 0 to 1
+    float sweep_sample = sweep * fs * 0.01f; // todo: rename
+                                          // delaytimeMax : 10ms as pdf
     float freq_now = freq;
+    float delay_min_sample = delayTime * 0.001f * fs; // 0 to 5 [ms]
+                                               // delay(min) in sample
 
 
     float* channelOutDataL = buffer.getWritePointer(0);
@@ -166,20 +169,20 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     const float* channelInDataL = buffer.getReadPointer(0);
     const float* channelInDataR = buffer.getReadPointer(1);
 
-    dbuf.setSample(0, dw, channelInDataL[0]); // todo: cosa fa? copio il primo sample nel buffer di uscita?
-    dbuf.setSample(1, dw, channelInDataR[0]);
+    // dbuf.setSample(0, dw, channelInDataL[0]); // todo: cosa fa? copio il primo sample nel buffer di uscita?
+    // dbuf.setSample(1, dw, channelInDataR[0]);
 
     // Delay line
     for (int i=0; i<numSamples; ++i) {
 
         float interpolatedSample = 0.0;
-        float currentDelay = width_now * ( 0.5f + 0.5f * sinf(2.0 * M_PI * phase) );
+        float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * M_PI * phase) );
         // todo: add the minimum delay
 
         // delay in sample
-        // todo: capire se width e quindi current delay li vogliamo normalizzati a 1 o misurati giá in samples
+        // todo: currentDelay, delay_min_sample, sweep_sample sono tutti misurati in sample
         // todo: a cosa serve sto delay di 3 sample
-        dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 3.0, (float)ds);
+        dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 3.0f, (float)ds);
 
         // Linear interpolation
         float fraction = dr - floorf(dr);
@@ -194,8 +197,8 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         dbuf.setSample(0, dw, channelInDataL[i] + interpolatedSample * fb_now);
         dbuf.setSample(1, dw, channelInDataR[i] + interpolatedSample * fb_now); //todo: stereo, change interpolatedSampleRIGHT
 
-        channelOutDataL[i] = dry_now * channelInDataL[i] + wet_now* interpolatedSample;
-        channelOutDataR[i] = dry_now * channelInDataR[i] + wet_now* interpolatedSample; // todo: stereoify
+        channelOutDataL[i] = channelInDataL[i] + (1 - dry_now)* interpolatedSample;
+        channelOutDataR[i] = channelInDataR[i] + (1 - dry_now)* interpolatedSample; // todo: stereoify
 
         dw = (dw + 1 ) % ds_now;
         // dr = (dr + 1 ) % ds_now;
@@ -241,36 +244,34 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 //The functions that will be used by the Editor to update slider values
 
 
-void StereoFlangerAudioProcessor::set_wet(float val)
+//==========================================
+void StereoFlangerAudioProcessor::set_sweep(float val)
 {
-    wet = val;
+    sweep = val;
 }
 
-
-void StereoFlangerAudioProcessor::set_dry(float val)
+void StereoFlangerAudioProcessor::set_dry_wet(float val)
 {
     dry = val;
 }
 
-
-void StereoFlangerAudioProcessor::set_ds(int val)
+void StereoFlangerAudioProcessor::set_delayTime(int val)
 {
-    ds = val;
+    delayTime = val;
 }
 
-
-void StereoFlangerAudioProcessor::set_fb(float val)
+void StereoFlangerAudioProcessor::set_feedback(float val)
 {
     feedback = val;
 }
-
 
 void StereoFlangerAudioProcessor::set_freq(float val)
 {
     freq = val;
 }
 
-void StereoFlangerAudioProcessor::set_width(float val)
+void StereoFlangerAudioProcessor::set_phase(float val)
 {
-    width = val;
+    phase = val;
 }
+//==========================================
