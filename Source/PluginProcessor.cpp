@@ -176,7 +176,10 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (int i=0; i<numSamples; ++i) {
 
         float interpolatedSample = 0.0;
-        float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * M_PI * phase) );
+        // float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * phase) );
+        // float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * freq_now / fs * (float)i) );
+        //tentative triangle
+        float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * fmodf((float)i / fs, 1/freq_now)*freq );
         // todo: add the minimum delay
 
         // delay in sample
@@ -189,6 +192,7 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         int previousSample = (int)floorf(dr);
         int nextSample = (previousSample + 1) % ds;
         interpolatedSample = fraction * dbuf.getSample(0, nextSample) + (1.0f - fraction) * dbuf.getSample(0,previousSample);
+        interpolatedSample = dbuf.getSample(0,previousSample);
         // todo: do it also for the right channel
 
 

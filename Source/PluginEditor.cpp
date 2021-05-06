@@ -42,7 +42,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     addAndMakeVisible (feedbackLabel);
 
     // frequency
-    freqSlider.setRange(0.0, 0.9);
+    freqSlider.setRange(0.0, 10);
     freqSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     freqSlider.addListener(this);
     freqLabel.setText("Frequency", juce::dontSendNotification);
