@@ -7,13 +7,10 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
 //==============================================================================
-/**
-*/
 class StereoFlangerAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Slider::Listener
 {
 public:
@@ -28,27 +25,27 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     StereoFlangerAudioProcessor& audioProcessor;
-    
-    juce::Slider wetSlider;
-    juce::Label wetLabel;
-    
-    juce::Slider drySlider;
-    juce::Label dryLabel;
-    
+
+    juce::Slider dry_wetSlider;
+    juce::Label dry_wetLabel;
+
     juce::Slider timeSlider;
     juce::Label timeLabel;
-    
+
     juce::Slider freqSlider;
     juce::Label freqLabel;
-    
-    juce::Slider widthSlider;
-    juce::Label widthLabel;
-    
+
+    juce::Slider sweepSlider;
+    juce::Label sweepLabel;
+
     juce::Slider feedbackSlider;
     juce::Label feedbackLabel;
-    
+
+    juce::Slider phaseSlider;
+    juce::Label phaseLabel;
+
     void sliderValueChanged(juce::Slider* slider) override;
     //********************************************************************************************//
-        
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessorEditor)
 };

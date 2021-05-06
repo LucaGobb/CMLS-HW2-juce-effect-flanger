@@ -13,42 +13,61 @@
 StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlangerAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    //Wet
-    wetSlider.setRange (0.0, 1.0);
-    wetSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
-    wetSlider.addListener(this);
-    wetLabel.setText ("Wet Level", juce::dontSendNotification);
-    
-    addAndMakeVisible (wetSlider);
-    addAndMakeVisible (wetLabel);
-    
-    //Dry
-    drySlider.setRange (0.0, 1.0);
-    drySlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
-    drySlider.addListener(this);
-    dryLabel.setText ("Dry Level", juce::dontSendNotification);
-    
-    addAndMakeVisible (drySlider);
-    addAndMakeVisible (dryLabel);
-    
-    //Delay Time
-    timeSlider.setRange (500, 50000, 100);
+
+    // dry/wet
+    dry_wetSlider.setRange (0.0, 1.0);
+    dry_wetSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    dry_wetSlider.addListener(this);
+    dry_wetLabel.setText ("Dry/Wet Level", juce::dontSendNotification);
+
+    addAndMakeVisible (dry_wetSlider);
+    addAndMakeVisible (dry_wetLabel);
+
+    // delay Time
+    timeSlider.setRange (0, 5, 1);
     timeSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     timeSlider.addListener(this);
-    timeLabel.setText ("Time", juce::dontSendNotification);
-    
+    timeLabel.setText ("Delay time", juce::dontSendNotification);
+
     addAndMakeVisible (timeSlider);
     addAndMakeVisible (timeLabel);
-    
-    // Feedback Duration
+
+    // feedback gain
     feedbackSlider.setRange(0.0,0.9);
     feedbackSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     feedbackSlider.addListener(this);
-    feedbackLabel.setText("Feedback duration", juce::dontSendNotification);
-    
+    feedbackLabel.setText("Feedback gain", juce::dontSendNotification);
+
     addAndMakeVisible (feedbackSlider);
     addAndMakeVisible (feedbackLabel);
-    
+
+    // frequency
+    freqSlider.setRange(0.0, 0.9);
+    freqSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
+    freqSlider.addListener(this);
+    freqLabel.setText("Frequency", juce::dontSendNotification);
+
+    addAndMakeVisible(freqSlider);
+    addAndMakeVisible(freqLabel);
+
+    // phase
+    phaseSlider.setRange(0.0, 0.9);
+    phaseSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
+    phaseSlider.addListener(this);
+    phaseLabel.setText("Phase", juce::dontSendNotification);
+
+    addAndMakeVisible(phaseSlider);
+    addAndMakeVisible(phaseLabel);
+
+    // sweep
+    sweepSlider.setRange (0.0, 1.0);
+    sweepSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    sweepSlider.addListener(this);
+    sweepLabel.setText ("Sweep width", juce::dontSendNotification);
+
+    addAndMakeVisible (sweepSlider);
+    addAndMakeVisible (sweepLabel);
+
     setSize (400, 300);
 }
 
@@ -61,7 +80,6 @@ void StereoFlangerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
     g.drawFittedText ("Feedback Delay", getLocalBounds(), juce::Justification::centred, 1);
@@ -69,41 +87,39 @@ void StereoFlangerAudioProcessorEditor::paint (juce::Graphics& g)
 
 void StereoFlangerAudioProcessorEditor::resized()
 {
-    
-    wetLabel.setBounds (10, 10, 90, 20);
-    wetSlider.setBounds (100, 10, getWidth() - 110, 20);
-    
-    dryLabel.setBounds (10, 50, 90, 20);
-    drySlider.setBounds (100, 50, getWidth() - 110, 20);
-    
+
+    sweepLabel.setBounds (10, 10, 90, 20);
+    sweepSlider.setBounds (100, 10, getWidth() - 110, 20);
+
+    dry_wetLabel.setBounds (10, 50, 90, 20);
+    dry_wetSlider.setBounds (100, 50, getWidth() - 110, 20);
+
     timeLabel.setBounds (10, 90, 90, 20);
     timeSlider.setBounds (100, 90, getWidth() - 110, 20);
-    
+
     feedbackLabel.setBounds (10, 130, 90, 20);
     feedbackSlider.setBounds (100, 130, getWidth() - 110, 20);
-    
-    freqLabel.setBounds (10, 90, 90, 20);
-    freqSlider.setBounds (100, 90, getWidth() - 110, 20);
 
-    widthLabel.setBounds (10, 90, 90, 20);
-    widthSlider.setBounds (100, 90, getWidth() - 110, 20);
+    freqLabel.setBounds (10, 170, 90, 20);
+    freqSlider.setBounds (100, 170, getWidth() - 110, 20);
 
-    
+    phaseLabel.setBounds (10, 210, 90, 20);
+    phaseSlider.setBounds (100, 210, getWidth() - 110, 20);
+
 }
 
 void StereoFlangerAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
 {
-    if (slider == &wetSlider)
-        audioProcessor.set_wet(wetSlider.getValue());
-    else if (slider == &drySlider)
-        audioProcessor.set_dry(drySlider.getValue());
+    if (slider == &sweepSlider)
+        audioProcessor.set_sweep(sweepSlider.getValue());
+    else if (slider == &dry_wetSlider)
+        audioProcessor.set_dry_wet(dry_wetSlider.getValue());
     else if (slider == &timeSlider)
-        audioProcessor.set_ds(timeSlider.getValue());
+        audioProcessor.set_delayTime(timeSlider.getValue());
     else if (slider == &feedbackSlider)
-        audioProcessor.set_fb(feedbackSlider.getValue());
-
+        audioProcessor.set_feedback(feedbackSlider.getValue());
     else if (slider == &freqSlider)
         audioProcessor.set_freq(freqSlider.getValue());
-    else if (slider == &widthSlider)
-        audioProcessor.set_width(widthSlider.getValue());
+    else if (slider == &phaseSlider)
+        audioProcessor.set_freq(phaseSlider.getValue());
 }

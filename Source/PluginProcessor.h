@@ -7,19 +7,16 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
-
 
 class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
 {
 
     public:
-   
+
     StereoFlangerAudioProcessor();
     ~StereoFlangerAudioProcessor() override;
-
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -53,33 +50,34 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void set_wet(float val);
-    void set_dry(float val);
-    void set_fb(float val);
-    void set_ds(int val);
+    void set_sweep(float val);
+    void set_dry_wet(float val);
+    void set_feedback(float val);
+    void set_delayTime(int val);
     void set_freq(float val);
-    void set_width(float val);
-    
+    void set_phase(float val);
 
     private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessor)
-    
+
+    // Delay Buffer
+    //============================
     juce::AudioSampleBuffer dbuf;
-    
-    int dw; 
-    int dr;
-    int ds;
-    
-    int fs;
-    
-    float wet;
+    float dr; // reading index
+    int dw; // writing index
+    int ds; // buffer length in samples
+    //============================
+
+    float f_s; // Sampling Rate
     float dry;
-    float feedback;
-    
-    float phase;
-    float T;
-    
-    float freq;
-    float width;
+    float feedback; // Feedback gain
+
+    // Low Frequency Oscillator
+    //============================
+    float freq; // LFO frequency
+    float sweep; // Sweep Width (i.e. LFO amplitude)
+    float phase; // Phase offset between L&R channels
+    int delayTime; // Minimum Delay Time
+    //============================
 };
