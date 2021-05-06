@@ -7,7 +7,9 @@
 */
 
 #pragma once
+
 #include <JuceHeader.h>
+
 
 class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
@@ -17,6 +19,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
     StereoFlangerAudioProcessor();
     ~StereoFlangerAudioProcessor() override;
+
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -69,15 +72,15 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     int ds; // buffer length in samples
     //============================
 
-    float f_s; // Sampling Rate
+    float fs; // Sampling Rate
+    float wet; // doto: do we need both?
     float dry;
     float feedback; // Feedback gain
 
-    // Low Frequency Oscillator
-    //============================
-    float freq; // LFO frequency
+    float T;
+    
+    float freq;
     float sweep; // Sweep Width (i.e. LFO amplitude)
     float phase; // Phase offset between L&R channels
     int delayTime; // Minimum Delay Time
-    //============================
 };

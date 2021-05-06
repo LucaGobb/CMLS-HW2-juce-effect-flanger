@@ -7,27 +7,30 @@
 //==============================================================================
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-    : AudioProcessor(BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+     : AudioProcessor (BusesProperties()
+                     #if ! JucePlugin_IsMidiEffect
+                      #if ! JucePlugin_IsSynth
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                      #endif
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+                     #endif
+                       )
 #endif
-        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#endif
-    )
-#endif
-{}
+{
+}
 
 StereoFlangerAudioProcessor::~StereoFlangerAudioProcessor()
 {
 }
 
 //==============================================================================
-const juce::String StereoFlangerAudioProcessor::getName() const{
+const juce::String StereoFlangerAudioProcessor::getName() const
+{
     return JucePlugin_Name;
 }
 
-bool StereoFlangerAudioProcessor::acceptsMidi() const{
+bool StereoFlangerAudioProcessor::acceptsMidi() const
+{
    #if JucePlugin_WantsMidiInput
     return true;
    #else
@@ -35,7 +38,8 @@ bool StereoFlangerAudioProcessor::acceptsMidi() const{
    #endif
 }
 
-bool StereoFlangerAudioProcessor::producesMidi() const{
+bool StereoFlangerAudioProcessor::producesMidi() const
+{
    #if JucePlugin_ProducesMidiOutput
     return true;
    #else
@@ -43,7 +47,8 @@ bool StereoFlangerAudioProcessor::producesMidi() const{
    #endif
 }
 
-bool StereoFlangerAudioProcessor::isMidiEffect() const{
+bool StereoFlangerAudioProcessor::isMidiEffect() const
+{
    #if JucePlugin_IsMidiEffect
     return true;
    #else
@@ -51,45 +56,57 @@ bool StereoFlangerAudioProcessor::isMidiEffect() const{
    #endif
 }
 
-double StereoFlangerAudioProcessor::getTailLengthSeconds() const{
+double StereoFlangerAudioProcessor::getTailLengthSeconds() const
+{
     return 0.0;
 }
 
-int StereoFlangerAudioProcessor::getNumPrograms(){
+int StereoFlangerAudioProcessor::getNumPrograms()
+{
     return 1;
 }
 
-int StereoFlangerAudioProcessor::getCurrentProgram(){
+int StereoFlangerAudioProcessor::getCurrentProgram()
+{
     return 0;
 }
 
-void StereoFlangerAudioProcessor::setCurrentProgram (int index){
+void StereoFlangerAudioProcessor::setCurrentProgram (int index)
+{
 }
 
-const juce::String StereoFlangerAudioProcessor::getProgramName (int index){
+const juce::String StereoFlangerAudioProcessor::getProgramName (int index)
+{
     return {};
 }
 
-void StereoFlangerAudioProcessor::changeProgramName (int index, const juce::String& newName){
+void StereoFlangerAudioProcessor::changeProgramName (int index, const juce::String& newName)
+{
 }
 
 //==============================================================================
 void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    f_s = sampleRate;
-    dbuf.setSize(getTotalNumOutputChannels(), 100000); // La dimensione del delay buffer per un flanger è pochi ms
-    dbuf.clear(); // dbuf credo sia il buffer che contiene i delayed samples
 
-    dw = 1;
-    dr = 0;
-    //dr = (dw - delayTime + ds ) % ds;
-    ds = dbuf.getNumSamples();
-    feedback = 0.5;
-    freq = 50;
+    dbuf.setSize(getTotalNumOutputChannels(), 100000); // todo: set the buffer dimension properly
+    dbuf.clear();
+
+    dw = 0; //write pointer
+    // dr = 1; //read pointer
+    ds = 100000; //dealy value // todo: just make it equal to the buffer size
+    // fs = 44100;
+    fs = sampleRate; // todo: correct?
+
+    feedback = 0.5; //feedback gain
+
     phase = 0.0;
+
 }
 
-void StereoFlangerAudioProcessor::releaseResources(){
+void StereoFlangerAudioProcessor::releaseResources()
+{
+    // When playback stops, you can use this as an opportunity to free up any
+    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -114,7 +131,9 @@ bool StereoFlangerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 }
 #endif
 
+// todo: do we need midibuffer as input? or it is as default?
 void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+//void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -123,94 +142,135 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Pointers to buffer
-    //auto* channelOutL = buffer.getWritePointer(0); // write pointer
-    //auto* channelOutR = buffer.getWritePointer(1);
-
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        int numSamples = buffer.getNumSamples();
-        float dryMix_ = dry;
-        float wetMix_ = 1 - dryMix_;
-        float feedback_ = feedback;
-        float freq_ = freq;
-        float phase_ = phase;
-        int delayTime_ = delayTime;
-        float sweep_ = sweep * f_s * delayTime_;
-
-        // Pointers to buffer
-        auto* channelOut = buffer.getWritePointer(channel); // write pointer
-        const auto* channelIn = buffer.getReadPointer(channel); // read pointer
-
-        for (int i=0; i<numSamples; ++i) {
-
-            // Delay line
-            dbuf.setSample(channel, dw, channelIn[i]);
-            //dbuf.setSample(1, dw, channelIn[i]);
-
-            // Linear interpolation
-            float interpolatedSample = 0.0;
-            float fraction = dr - floorf(dr);
-            int previousSample = (int)floorf(dr);
-            int nextSample = (previousSample + 1) % ds;
-            interpolatedSample = fraction * dbuf.getSample(channel, nextSample) + (1.0f - fraction) * dbuf.getSample(channel,previousSample);
-
-            // Feedback
-            dbuf.setSample(channel, dw, channelIn[i] + interpolatedSample * feedback_);
-            //dbuf.setSample(0, dw, channelIn[i] + interpolatedSampleR * feedback_);
-
-            // Mix wet signal and dry signal
-            channelOut[i] = dryMix_ * channelIn[i] + wetMix_ * interpolatedSample;
-            //channelOutR[i] = dryMix_ * channelIn[i] + wetMix_ * interpolatedSampleR;
-
-            // Circular buffer
-            float currentDelay;
-            if(channel==1){
-                currentDelay = sweep_ * ( 0.5f + 0.5f * sinf(2.0f * 3.1416 * freq_ * i + phase_)) + delayTime_;
-            }
-            else if (channel == 0){
-                currentDelay = sweep_ * ( 0.5f + 0.5f * sinf(2.0f * 3.1416 * freq_ * i)) + delayTime_;
-            }
-
-            dw = (dw + 1 ) % ds;
-            dr = fmodf((float)dw - (float)(currentDelay) + (float)ds - 3.0, (float)ds);
-        }
+      auto* channelData = buffer.getWritePointer (channel);
     }
+
+    int numSamples= buffer.getNumSamples();
+
+
+    float dry_now = dry;
+    // float wet_now = wet;
+    float wet_now = 1 - dry_now;
+    float fb_now = feedback;
+    int ds_now = ds;
+    // width_now is the sweep in sample
+    float width_now = wet * fs * 0.01; // todo: rename
+                                       // delaytimeMax : 10ms as pdf
+    float freq_now = freq;
+
+
+    float* channelOutDataL = buffer.getWritePointer(0);
+    float* channelOutDataR = buffer.getWritePointer(1);
+    const float* channelInDataL = buffer.getReadPointer(0);
+    const float* channelInDataR = buffer.getReadPointer(1);
+
+    dbuf.setSample(0, dw, channelInDataL[0]); // todo: cosa fa? copio il primo sample nel buffer di uscita?
+    dbuf.setSample(1, dw, channelInDataR[0]);
+
+    // Delay line
+    for (int i=0; i<numSamples; ++i) {
+
+        float interpolatedSample = 0.0;
+        float currentDelay = width_now * ( 0.5f + 0.5f * sinf(2.0 * M_PI * phase) );
+        // todo: add the minimum delay
+
+        // delay in sample
+        // todo: capire se width e quindi current delay li vogliamo normalizzati a 1 o misurati giá in samples
+        // todo: a cosa serve sto delay di 3 sample
+        dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 3.0, (float)ds);
+
+        // Linear interpolation
+        float fraction = dr - floorf(dr);
+        int previousSample = (int)floorf(dr);
+        int nextSample = (previousSample + 1) % ds;
+        interpolatedSample = fraction * dbuf.getSample(0, nextSample) + (1.0f - fraction) * dbuf.getSample(0,previousSample);
+        // todo: do it also for the right channel
+
+
+        // Feedback
+        // delayData[dpw] = in + (interpolatedSample * feedback_);
+        dbuf.setSample(0, dw, channelInDataL[i] + interpolatedSample * fb_now);
+        dbuf.setSample(1, dw, channelInDataR[i] + interpolatedSample * fb_now); //todo: stereo, change interpolatedSampleRIGHT
+
+        channelOutDataL[i] = dry_now * channelInDataL[i] + wet_now* interpolatedSample;
+        channelOutDataR[i] = dry_now * channelInDataR[i] + wet_now* interpolatedSample; // todo: stereoify
+
+        dw = (dw + 1 ) % ds_now;
+        // dr = (dr + 1 ) % ds_now;
+
+        //dbuf.setSample(0,dr,channelInDataL[i]) = interpolatedSample;
+
+        phase += freq_now / fs;
+        if(phase >= 1.0)
+            phase -= 1.0;
+    }
+
 }
 
 //==============================================================================
-bool StereoFlangerAudioProcessor::hasEditor() const{
+bool StereoFlangerAudioProcessor::hasEditor() const
+{
     return true; // (change this to false if you choose to not supply an editor)
 }
-juce::AudioProcessorEditor* StereoFlangerAudioProcessor::createEditor(){
+
+
+juce::AudioProcessorEditor* StereoFlangerAudioProcessor::createEditor()
+{
     return new StereoFlangerAudioProcessorEditor (*this);
 }
-void StereoFlangerAudioProcessor::getStateInformation (juce::MemoryBlock& destData){
+
+
+//==============================================================================
+void StereoFlangerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
 }
-void StereoFlangerAudioProcessor::setStateInformation (const void* data, int sizeInBytes){
+
+void StereoFlangerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+{
 }
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter(){
+
+//==============================================================================
+// This creates new instances of the plugin..
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
     return new StereoFlangerAudioProcessor();
 }
 
-// The functions that will be used by the Editor to update slider values
-//==========================================
-void StereoFlangerAudioProcessor::set_sweep(float val){
-    sweep = val;
+//The functions that will be used by the Editor to update slider values
+
+
+void StereoFlangerAudioProcessor::set_wet(float val)
+{
+    wet = val;
 }
-void StereoFlangerAudioProcessor::set_dry_wet(float val){
+
+
+void StereoFlangerAudioProcessor::set_dry(float val)
+{
     dry = val;
 }
-void StereoFlangerAudioProcessor::set_delayTime(int val){
-    delayTime = val;
+
+
+void StereoFlangerAudioProcessor::set_ds(int val)
+{
+    ds = val;
 }
-void StereoFlangerAudioProcessor::set_feedback(float val){
+
+
+void StereoFlangerAudioProcessor::set_fb(float val)
+{
     feedback = val;
 }
-void StereoFlangerAudioProcessor::set_freq(float val){
+
+
+void StereoFlangerAudioProcessor::set_freq(float val)
+{
     freq = val;
 }
-void StereoFlangerAudioProcessor::set_phase(float val){
-    phase = val;
+
+void StereoFlangerAudioProcessor::set_width(float val)
+{
+    width = val;
 }
-//==========================================
