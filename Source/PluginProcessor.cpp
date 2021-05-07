@@ -157,10 +157,10 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     int ds_now = ds;
     // width_now is the sweep in sample
     // sweep: 0 to 1
-    float sweep_sample = sweep * fs * 0.01f; // todo: rename
+    float sweep_sample = sweep * getSampleRate() * 0.01f; // todo: rename
                                           // delaytimeMax : 10ms as pdf
     float freq_now = freq;
-    float delay_min_sample = delayTime * 0.001f * fs; // 0 to 5 [ms]
+    float delay_min_sample = delayTime * 0.001f * getSampleRate(); // 0 to 5 [ms]
                                                // delay(min) in sample
 
 
@@ -176,23 +176,21 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (int i=0; i<numSamples; ++i) {
 
         float interpolatedSample = 0.0;
-        // float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * phase) );
-        // float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * freq_now / fs * (float)i) );
+        float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * phase) );
+        //float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * sinf(2.0f * 3.14f * freq_now / fs * (float)i) );
         //tentative triangle
-        float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * fmodf((float)i / fs, 1/freq_now)*freq );
-        // todo: add the minimum delay
+        // float currentDelay = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * fmodf((float)i / fs, 1/freq_now)*freq );
 
         // delay in sample
         // todo: currentDelay, delay_min_sample, sweep_sample sono tutti misurati in sample
         // todo: a cosa serve sto delay di 3 sample
-        dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 3.0f, (float)ds);
+        dr = fmodf((float)dw - (float)(currentDelay /* * fs*/) + (float)ds - 1.0f, (float)ds);
 
         // Linear interpolation
         float fraction = dr - floorf(dr);
         int previousSample = (int)floorf(dr);
         int nextSample = (previousSample + 1) % ds;
         interpolatedSample = fraction * dbuf.getSample(0, nextSample) + (1.0f - fraction) * dbuf.getSample(0,previousSample);
-        interpolatedSample = dbuf.getSample(0,previousSample);
         // todo: do it also for the right channel
 
 
@@ -209,7 +207,7 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
         //dbuf.setSample(0,dr,channelInDataL[i]) = interpolatedSample;
 
-        phase += freq_now / fs;
+        phase += freq_now / getSampleRate();
         if(phase >= 1.0)
             phase -= 1.0;
     }
@@ -276,6 +274,6 @@ void StereoFlangerAudioProcessor::set_freq(float val)
 
 void StereoFlangerAudioProcessor::set_phase(float val)
 {
-    phase = val;
+    phaseRL = val;
 }
 //==========================================

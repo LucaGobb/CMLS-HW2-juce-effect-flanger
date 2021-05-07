@@ -122,5 +122,5 @@ void StereoFlangerAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
     else if (slider == &freqSlider)
         audioProcessor.set_freq(freqSlider.getValue());
     else if (slider == &phaseSlider)
-        audioProcessor.set_freq(phaseSlider.getValue());
+        audioProcessor.set_phase(phaseSlider.getValue());
 }
