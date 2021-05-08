@@ -15,13 +15,6 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
                        )
 #endif
 {
-    sweep = 0.0f;
-    phase = 0.0f;
-    freq = 0.0f;
-    depth = 0.0f;
-    feedback = 0.0f;
-    phaseRL = 0.0f;
-    delayTime = 0.0f;
 }
 
 StereoFlangerAudioProcessor::~StereoFlangerAudioProcessor()

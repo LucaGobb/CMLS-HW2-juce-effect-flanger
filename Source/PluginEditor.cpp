@@ -14,7 +14,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
 
-    // dry/wet
+    // depth
     depthSlider.setRange (0.0, 1.0);
     depthSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     depthSlider.addListener(this);
