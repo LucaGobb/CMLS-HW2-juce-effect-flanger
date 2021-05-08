@@ -56,7 +56,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void set_sweep(float val);
     void set_dry_wet(float val);
     void set_feedback(float val);
-    void set_delayTime(int val);
+    void set_delayTime(float val);
     void set_freq(float val);
     void set_phase(float val);
 
@@ -73,14 +73,13 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     //============================
 
     float fs; // Sampling Rate
-    float wet; // doto: do we need both?
     float dry;
     float feedback; // Feedback gain
 
-    float T;
-
     float freq;
     float sweep; // Sweep Width (i.e. LFO amplitude)
-    float phase; // Phase offset between L&R channels
+    
+    float phase; // istantaneous phase of the LFO
+    float phaseRL; // Phase offset between L&R channels
     float delayTime; // Minimum Delay Time
 };
