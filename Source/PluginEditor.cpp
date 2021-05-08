@@ -1,4 +1,4 @@
-depth/*
+/*
   ==============================================================================
 
     This file contains the basic framework code for a JUCE plugin editor.
@@ -18,16 +18,16 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     depthSlider.setRange (0.0, 1.0);
     depthSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     depthSlider.addListener(this);
-    depthLabel.setText ("Dry/Wet Level", juce::dontSendNotification);
+    depthLabel.setText ("Depth Level", juce::dontSendNotification);
 
     addAndMakeVisible (depthSlider);
     addAndMakeVisible (depthLabel);
 
     // delay Time
-    timeSlider.setRange (0, 5, 0.1);
+    timeSlider.setRange (0, maximumTimeDelay, 0.1);
     timeSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     timeSlider.addListener(this);
-    timeLabel.setText ("Delay time", juce::dontSendNotification);
+    timeLabel.setText ("Delay time [ms]", juce::dontSendNotification);
 
     addAndMakeVisible (timeSlider);
     addAndMakeVisible (timeLabel);
@@ -45,7 +45,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     freqSlider.setRange(0.0, 10);
     freqSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     freqSlider.addListener(this);
-    freqLabel.setText("Frequency", juce::dontSendNotification);
+    freqLabel.setText("Frequency [Hz]", juce::dontSendNotification);
 
     addAndMakeVisible(freqSlider);
     addAndMakeVisible(freqLabel);
@@ -60,10 +60,10 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     addAndMakeVisible(phaseLabel);
 
     // sweep
-    sweepSlider.setRange (0.0, 1.0);
+    sweepSlider.setRange (0.0, maximumSweepWidth);
     sweepSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     sweepSlider.addListener(this);
-    sweepLabel.setText ("Sweep width", juce::dontSendNotification);
+    sweepLabel.setText ("Sweep width [ms]", juce::dontSendNotification);
 
     addAndMakeVisible (sweepSlider);
     addAndMakeVisible (sweepLabel);

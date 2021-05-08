@@ -2,6 +2,9 @@
 #include "PluginEditor.h"
 #include <math.h>
 
+const float StereoFlangerAudioProcessor::maximumDelay = 10.0f;
+const float StereoFlangerAudioProcessor::maximumSweepWidth = 10.0f;
+
 //==============================================================================
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -85,20 +88,18 @@ void StereoFlangerAudioProcessor::changeProgramName (int index, const juce::Stri
 //==============================================================================
 void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    //buffer inizialization:
-    //   (delay minimum + sweep) in samples + 1 sample for interpolation
-    delayBufferLength= (int)((5 + 10) *0.001f * sampleRate) + 1; // todo: do more parametric
-    dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
+    // dalay buffer inizialization:
+    int delayBufferNumChannels = getTotalNumOutputChannels();
+    int delayBufferNumSamples = (int)((maximumDelay + maximumSweepWidth) * sampleRate/1000) + samplesPerBlock;
+    dbuf.setSize(delayBufferNumChannels, delayBufferNumSamples);
     dbuf.clear();
 
-    dw = 0; //write pointer
-    fs = sampleRate;
+    float samplingPeriod = 1/sampleRate;
 }
 
 void StereoFlangerAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    //dbuf.clear();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations

@@ -32,12 +32,14 @@ private:
 
     juce::Slider timeSlider;
     juce::Label timeLabel;
+    float maximumTimeDelay { 10.0f };
 
     juce::Slider freqSlider;
     juce::Label freqLabel;
 
     juce::Slider sweepSlider;
     juce::Label sweepLabel;
+    float maximumSweepWidth { 10.0f };
 
     juce::Slider feedbackSlider;
     juce::Label feedbackLabel;
