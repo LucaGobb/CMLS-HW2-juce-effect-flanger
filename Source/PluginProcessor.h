@@ -54,7 +54,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     void set_sweep(float val);
-    void set_dry_wet(float val);
+    void set_depth(float val);
     void set_feedback(float val);
     void set_delayTime(float val);
     void set_freq(float val);

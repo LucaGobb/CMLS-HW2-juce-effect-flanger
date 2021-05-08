@@ -27,8 +27,8 @@ private:
     // access the processor object that created it.
     StereoFlangerAudioProcessor& audioProcessor;
 
-    juce::Slider dry_wetSlider;
-    juce::Label dry_wetLabel;
+    juce::Slider depthSlider;
+    juce::Label depthLabel;
 
     juce::Slider timeSlider;
     juce::Label timeLabel;

@@ -15,13 +15,13 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
 {
 
     // dry/wet
-    dry_wetSlider.setRange (0.0, 1.0);
-    dry_wetSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
-    dry_wetSlider.addListener(this);
-    dry_wetLabel.setText ("Dry/Wet Level", juce::dontSendNotification);
+    depthSlider.setRange (0.0, 1.0);
+    depthSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
+    depthSlider.addListener(this);
+    depthLabel.setText ("Dry/Wet Level", juce::dontSendNotification);
 
-    addAndMakeVisible (dry_wetSlider);
-    addAndMakeVisible (dry_wetLabel);
+    addAndMakeVisible (depthSlider);
+    addAndMakeVisible (depthLabel);
 
     // delay Time
     timeSlider.setRange (0, 5, 0.1);
