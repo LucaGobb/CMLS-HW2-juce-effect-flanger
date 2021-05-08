@@ -67,7 +67,8 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     // Delay Buffer
     //============================
     juce::AudioSampleBuffer dbuf;
-    float dr; // reading index
+    float drL; // reading index
+    float drR; // reading index
     int dw; // writing index
     int ds; // buffer length in samples
     //============================
@@ -78,7 +79,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
     float freq;
     float sweep; // Sweep Width (i.e. LFO amplitude)
-    
+
     float phase; // istantaneous phase of the LFO
     float phaseRL; // Phase offset between L&R channels
     float delayTime; // Minimum Delay Time
