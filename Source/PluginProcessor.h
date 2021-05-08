@@ -81,10 +81,8 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     //============================
     float freq { 0.0f }; // LFO frequency
     float sweep { 0.0f }; // Sweep Width (i.e. LFO amplitude)
-    float maximumSweepWidth { 10.0f }; 
 
     float phase { 0.0f }; // istantaneous phase of the LFO
     float phaseRL { 0.0f }; // Phase offset between L&R channels
     float delayTime { 0.0f }; // Minimum Delay Time
-    float maximumTimeDelay { 10.0f };
 };
