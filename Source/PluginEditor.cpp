@@ -1,4 +1,4 @@
-/*
+depth/*
   ==============================================================================
 
     This file contains the basic framework code for a JUCE plugin editor.
@@ -92,8 +92,8 @@ void StereoFlangerAudioProcessorEditor::resized()
     sweepLabel.setBounds (10, 10, 90, 20);
     sweepSlider.setBounds (100, 10, getWidth() - 110, 20);
 
-    dry_wetLabel.setBounds (10, 50, 90, 20);
-    dry_wetSlider.setBounds (100, 50, getWidth() - 110, 20);
+    depthLabel.setBounds (10, 50, 90, 20);
+    depthSlider.setBounds (100, 50, getWidth() - 110, 20);
 
     timeLabel.setBounds (10, 90, 90, 20);
     timeSlider.setBounds (100, 90, getWidth() - 110, 20);
@@ -113,8 +113,8 @@ void StereoFlangerAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
 {
     if (slider == &sweepSlider)
         audioProcessor.set_sweep(sweepSlider.getValue());
-    else if (slider == &dry_wetSlider)
-        audioProcessor.set_dry_wet(dry_wetSlider.getValue());
+    else if (slider == &depthSlider)
+        audioProcessor.set_depth(depthSlider.getValue());
     else if (slider == &timeSlider)
         audioProcessor.set_delayTime(timeSlider.getValue());
     else if (slider == &feedbackSlider)

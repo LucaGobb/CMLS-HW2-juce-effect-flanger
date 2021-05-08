@@ -1,8 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
 #include <math.h>
-#define M_PI 3.14159 26536 //dovrebbe essere già incluso in <math.h>
 
 //==============================================================================
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
@@ -97,7 +95,7 @@ void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     //buffer inizialization:
     //   (delay minimum + sweep) in samples + 1 sample for interpolation
     delayBufferLength= (int)((5 + 10) *0.001f * sampleRate) + 1; // todo: do more parametric
-    dbuf.setSize(getTotalNumOutputChannels(), ds);
+    dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
     dw = 0; //write pointer
@@ -175,16 +173,16 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         // float currentDelayR = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * fmodf(phase+phaseRL_now,1.0) );
 
         // delay in sample
-        drL = fmodf((float)dw - (float)(currentDelayL) + (float)delayBufferLength- 1.0f, (float)ds);
-        drR = fmodf((float)dw - (float)(currentDelayR) + (float)delayBufferLength- 1.0f, (float)ds);
+        drL = fmodf((float)dw - (float)(currentDelayL) + (float)delayBufferLength- 1.0f, (float)delayBufferLength);
+        drR = fmodf((float)dw - (float)(currentDelayR) + (float)delayBufferLength- 1.0f, (float)delayBufferLength);
 
         // Linear interpolation
         float fractionL = drL - floorf(drL);
         float fractionR = drR - floorf(drR);
         int previousSampleL = (int)floorf(drL);
         int previousSampleR = (int)floorf(drR);
-        int nextSampleL = (previousSampleL + 1) % ds;
-        int nextSampleR = (previousSampleR + 1) % ds;
+        int nextSampleL = (previousSampleL + 1) % delayBufferLength;
+        int nextSampleR = (previousSampleR + 1) % delayBufferLength;
         interpolatedsampleL = fractionL * dbuf.getSample(0, nextSampleL) + (1.0f - fractionL) * dbuf.getSample(0,previousSampleL);
         interpolatedsampleR = fractionR * dbuf.getSample(1, nextSampleR) + (1.0f - fractionR) * dbuf.getSample(1,previousSampleR);
 
@@ -196,7 +194,7 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         channelOutDataL[i] = channelInDataL[i] + depth_* interpolatedsampleL;
         channelOutDataR[i] = channelInDataR[i] + depth_* interpolatedsampleR;
 
-        dw = (dw + 1 ) % ds;
+        dw = (dw + 1 ) % delayBufferLength;
 
         phase += freq_ / fs;
         if(phase >= 1.0)

@@ -70,11 +70,11 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     float drL; // reading index
     float drR; // reading index
     int dw; // writing index
-    int ds; // buffer length in samples
+    int delayBufferLength; // buffer length in samples
     //============================
 
     float fs; // Sampling Rate
-    float dry;
+    float depth;
     float feedback; // Feedback gain
 
     float freq;
