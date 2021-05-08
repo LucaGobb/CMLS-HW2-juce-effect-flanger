@@ -2,8 +2,7 @@
 
 <JUCERPROJECT id="Oi5mgB" name="StereoFlanger" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn"
-              pluginFormats="buildVST3" version="1.0.4">
+              pluginFormats="buildVST3" version="1.2.0">
   <MAINGROUP id="TZ0IGP" name="StereoFlanger">
     <GROUP id="{EF626E12-32F5-8494-20D6-8C5C1150B1AA}" name="Source">
       <FILE id="dF79yh" name="PluginProcessor.cpp" compile="1" resource="0"

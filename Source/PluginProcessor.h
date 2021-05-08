@@ -7,7 +7,9 @@
 */
 
 #pragma once
+
 #include <JuceHeader.h>
+
 
 class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
@@ -17,6 +19,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
 
     StereoFlangerAudioProcessor();
     ~StereoFlangerAudioProcessor() override;
+
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -53,7 +56,7 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void set_sweep(float val);
     void set_dry_wet(float val);
     void set_feedback(float val);
-    void set_delayTime(int val);
+    void set_delayTime(float val);
     void set_freq(float val);
     void set_phase(float val);
 
@@ -64,20 +67,20 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     // Delay Buffer
     //============================
     juce::AudioSampleBuffer dbuf;
-    float dr; // reading index
+    float drL; // reading index
+    float drR; // reading index
     int dw; // writing index
     int ds; // buffer length in samples
     //============================
 
-    float f_s; // Sampling Rate
+    float fs; // Sampling Rate
     float dry;
     float feedback; // Feedback gain
 
-    // Low Frequency Oscillator
-    //============================
-    float freq; // LFO frequency
+    float freq;
     float sweep; // Sweep Width (i.e. LFO amplitude)
-    float phase; // Phase offset between L&R channels
-    int delayTime; // Minimum Delay Time
-    //============================
+
+    float phase; // istantaneous phase of the LFO
+    float phaseRL; // Phase offset between L&R channels
+    float delayTime; // Minimum Delay Time
 };

@@ -24,7 +24,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     addAndMakeVisible (dry_wetLabel);
 
     // delay Time
-    timeSlider.setRange (0, 5, 1);
+    timeSlider.setRange (0, 5, 0.1);
     timeSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
     timeSlider.addListener(this);
     timeLabel.setText ("Delay time", juce::dontSendNotification);
@@ -42,7 +42,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor (StereoFlan
     addAndMakeVisible (feedbackLabel);
 
     // frequency
-    freqSlider.setRange(0.0, 0.9);
+    freqSlider.setRange(0.0, 10);
     freqSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     freqSlider.addListener(this);
     freqLabel.setText("Frequency", juce::dontSendNotification);
@@ -80,6 +80,7 @@ void StereoFlangerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
     g.drawFittedText ("Feedback Delay", getLocalBounds(), juce::Justification::centred, 1);
@@ -121,5 +122,5 @@ void StereoFlangerAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)
     else if (slider == &freqSlider)
         audioProcessor.set_freq(freqSlider.getValue());
     else if (slider == &phaseSlider)
-        audioProcessor.set_freq(phaseSlider.getValue());
+        audioProcessor.set_phase(phaseSlider.getValue());
 }
