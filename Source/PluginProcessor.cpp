@@ -95,7 +95,7 @@ void StereoFlangerAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
-    //samplingFrequency = sampleRate;
+    samplingFrequency = sampleRate;
     //samplingPeriod = 1 / sampleRate;
 }
 
