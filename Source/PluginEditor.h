@@ -1,8 +1,6 @@
 /*
   ==============================================================================
-
     This file contains the basic framework code for a JUCE plugin editor.
-
   ==============================================================================
 */
 
@@ -12,14 +10,14 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class StereoFlangerAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Slider::Listener
+class StereoFlangerAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Slider::Listener
 {
 public:
-    StereoFlangerAudioProcessorEditor (StereoFlangerAudioProcessor&);
+    StereoFlangerAudioProcessorEditor(StereoFlangerAudioProcessor&);
     ~StereoFlangerAudioProcessorEditor() override;
 
     //==============================================================================
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
 
 private:
@@ -30,16 +28,17 @@ private:
     juce::Slider depthSlider;
     juce::Label depthLabel;
 
+    juce::Slider waveSlider;
+    juce::Label waveLabel;
+
     juce::Slider timeSlider;
     juce::Label timeLabel;
-    float maximumTimeDelay { 10.0f };
 
     juce::Slider freqSlider;
     juce::Label freqLabel;
 
     juce::Slider sweepSlider;
     juce::Label sweepLabel;
-    float maximumSweepWidth { 10.0f };
 
     juce::Slider feedbackSlider;
     juce::Label feedbackLabel;
@@ -50,5 +49,5 @@ private:
     void sliderValueChanged(juce::Slider* slider) override;
     //********************************************************************************************//
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoFlangerAudioProcessorEditor)
 };

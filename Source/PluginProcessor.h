@@ -1,8 +1,6 @@
 /*
   ==============================================================================
-
     This file contains the basic framework code for a JUCE plugin processor.
-
   ==============================================================================
 */
 
@@ -11,24 +9,24 @@
 #include <JuceHeader.h>
 
 
-class StereoFlangerAudioProcessor  : public juce::AudioProcessor
+class StereoFlangerAudioProcessor : public juce::AudioProcessor
 
 {
 
-    public:
+public:
 
     StereoFlangerAudioProcessor();
     ~StereoFlangerAudioProcessor() override;
 
 
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+#endif
 
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -45,13 +43,13 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
 
     void set_sweep(float val);
     void set_depth(float val);
@@ -59,30 +57,39 @@ class StereoFlangerAudioProcessor  : public juce::AudioProcessor
     void set_delayTime(float val);
     void set_freq(float val);
     void set_phase(float val);
+    void set_wave(int val);
 
-    private:
+private:
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoFlangerAudioProcessor)
 
     // Delay Buffer
     //============================
     juce::AudioSampleBuffer dbuf;
     float drL; // reading index
     float drR; // reading index
-    int dw { 0 }; // writing index
+    int dw{ 0 }; // writing index
     int delayBufferLength; // buffer length in samples
     //============================
 
-    float fs; // Sampling Rate
-    float depth { 0.0f };
-    float feedback { 0.0f }; // Feedback gain
+    float samplingPeriod;
+    float samplingFrequency;
+    float depth{ 0.0f };
+    float feedback{ 0.0f }; // Feedback gain
 
-    // LFO
+    //LFO
     //============================
-    float freq { 0.0f }; // LFO frequency
-    float sweep { 0.0f }; // Sweep Width (i.e. LFO amplitude)
 
-    float phase { 0.0f }; // istantaneous phase of the LFO
-    float phaseRL { 0.0f }; // Phase offset between L&R channels
-    float delayTime { 0.0f }; // Minimum Delay Time
+    float lfo(float phase, int waveform);
+
+    float freq{ 0.0f }; // LFO frequency
+    float sweep{ 0.0f }; // Sweep Width (i.e. LFO amplitude)
+    float maxSweepWidth{ 10.0f };
+
+    float phase{ 0.0f }; // istantaneous phase of the LFO
+    float phaseRL{ 0.0f }; // Phase offset between L&R channels
+    float delayTime{ 0.0f }; // Minimum Delay Time
+    float maxDelayTime{ 10.0f };
+    int waveform;
+    //============================
 };
