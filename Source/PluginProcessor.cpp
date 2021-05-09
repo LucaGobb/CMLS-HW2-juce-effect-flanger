@@ -2,7 +2,7 @@
 #include "PluginEditor.h"
 
 #include <math.h>
-#define M_PI 3.14159 26536 //dovrebbe essere già incluso in <math.h>
+#define M_PI 3.14159 26536 //dovrebbe essere giï¿½ incluso in <math.h>
 
 //==============================================================================
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
@@ -17,7 +17,7 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
     )
 #endif
 {
-    
+
 }
 
 StereoFlangerAudioProcessor::~StereoFlangerAudioProcessor()
@@ -95,14 +95,12 @@ void StereoFlangerAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
-    samplingFrequency = sampleRate;
-    samplingPeriod = 1 / sampleRate;
+    //samplingFrequency = sampleRate;
+    //samplingPeriod = 1 / sampleRate;
 }
 
 void StereoFlangerAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -164,14 +162,9 @@ void StereoFlangerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
         float interpolatedSampleL = 0.0;
         float interpolatedSampleR = 0.0;
-        //float currentDelayL = delay_min_sample + sweep_sample * (0.5f + 0.5f * sinf(2.0f * 3.14f * phase));
-        //float currentDelayR = delay_min_sample + sweep_sample * (0.5f + 0.5f * sinf(2.0f * 3.14f * (phase + phaseRL_now)));
 
         float currentDelayL = delay_min_sample + sweep_sample * lfo(phase,waveform_);
         float currentDelayR = delay_min_sample + sweep_sample * lfo(phase + phaseRL_now,waveform_);
-        // Triangle
-        // float currentDelayL = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * phase );
-        // float currentDelayR = delay_min_sample + sweep_sample * ( 0.5f + 0.5f * fmodf(phase+phaseRL_now,1.0) );
 
         // delay in sample
         drL = fmodf((float)dw - (float)(currentDelayL)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
@@ -234,8 +227,6 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 }
 
 //The functions that will be used by the Editor to update slider values
-
-
 //==========================================
 void StereoFlangerAudioProcessor::set_sweep(float val)
 {
@@ -276,24 +267,24 @@ float StereoFlangerAudioProcessor::lfo(float phase, int waveform)
 {
     switch (waveform)
     {
-    case 1:
+    case 1: // Triangle
         if (phase < 0.25f)
             return 0.5f + 2.0f * phase;
         else if (phase < 0.75f)
             return 1.0f - 2.0f * (phase - 0.25f);
         else
             return 2.0f * (phase - 0.75f);
-    case 2:
+    case 2: // Square
         if (phase < 0.5f)
             return 1.0f;
         else
             return 0.0f;
-    case 3:
+    case 3: // Sawtooth
         if (phase < 0.5f)
             return 0.5f + phase;
         else
             return phase - 0.5f;
-    case 4:
+    case 4: // Sin
     default:
         return 0.5f + 0.5f * sinf(2.0 * 3.1416 * phase);
     }

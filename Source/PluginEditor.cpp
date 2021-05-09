@@ -17,7 +17,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor(StereoFlang
     depthSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     depthSlider.addListener(this);
     depthLabel.setText("Depth Level", juce::dontSendNotification);
-    
+
     addAndMakeVisible(depthSlider);
     addAndMakeVisible(depthLabel);
 
@@ -68,7 +68,7 @@ StereoFlangerAudioProcessorEditor::StereoFlangerAudioProcessorEditor(StereoFlang
     addAndMakeVisible(sweepLabel);
 
     // wave
-    waveSlider.setRange(0, 4, 1);
+    waveSlider.setRange(1, 4, 1);
     waveSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     waveSlider.addListener(this);
     waveLabel.setText("Waveform", juce::dontSendNotification);

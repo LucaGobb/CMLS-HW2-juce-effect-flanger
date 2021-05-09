@@ -90,6 +90,6 @@ private:
     float phaseRL{ 0.0f }; // Phase offset between L&R channels
     float delayTime{ 0.0f }; // Minimum Delay Time
     float maxDelayTime{ 10.0f };
-    int waveform;
+    int waveform{ 1 };
     //============================
 };
