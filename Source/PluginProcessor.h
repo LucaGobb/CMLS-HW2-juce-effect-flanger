@@ -1,67 +1,68 @@
 /*
   ==============================================================================
-    This file contains the basic framework code for a JUCE plugin processor.
+
+    This file was auto-generated!
+
+    It contains the basic framework code for a JUCE plugin processor.
+
   ==============================================================================
 */
 
 #pragma once
 
-#include <JuceHeader.h>
+#include "../JuceLibraryCode/JuceHeader.h"
 
 
-class StereoFlangerAudioProcessor : public juce::AudioProcessor
+class PresetListBox;
 
+//==============================================================================
+/**
+*/
+class StereoFlangerAudioProcessor  : public foleys::MagicProcessor
 {
-
 public:
-
+    //==============================================================================
     StereoFlangerAudioProcessor();
-    ~StereoFlangerAudioProcessor() override;
 
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+
+    //==============================================================================
+    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
+
 #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+    bool isBusesLayoutSupported (const juce::AudioProcessor::BusesLayout& layouts) const override;
 #endif
 
-    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
-    juce::AudioProcessorEditor* createEditor() override;
-    bool hasEditor() const override;
+    void savePresetInternal();
+    void loadPresetInternal(int index);
 
     //==============================================================================
-    const juce::String getName() const override;
-
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
 
-    //==============================================================================
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram(int index) override;
-    const juce::String getProgramName(int index) override;
-    void changeProgramName(int index, const juce::String& newName) override;
-
-    //==============================================================================
-    void getStateInformation(juce::MemoryBlock& destData) override;
-    void setStateInformation(const void* data, int sizeInBytes) override;
-
-    void set_sweep(float val);
-    void set_depth(float val);
-    void set_feedback(float val);
-    void set_delayTime(float val);
-    void set_freq(float val);
-    void set_phase(float val);
-    void set_wave(int val);
-
 private:
+    //==============================================================================
+    juce::AudioProcessorValueTreeState treeState;
+    std::atomic<float>* phaseRL = nullptr;
+    std::atomic<float>* depth  = nullptr;
+    std::atomic<float>* freq = nullptr;
+    std::atomic<float>* delayTime  = nullptr;
+    std::atomic<float>* feedback = nullptr;
+    std::atomic<float>* sweep  = nullptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoFlangerAudioProcessor)
+
+    juce::ValueTree  presetNode;
+
+    // GUI MAGIC: define that as last member of your AudioProcessor
+    foleys::MagicLevelSource*   outputMeter  = nullptr;
+    foleys::MagicPlotSource*    oscilloscope = nullptr;
+    foleys::MagicPlotSource*    analyser     = nullptr;
+
+    PresetListBox*              presetList   = nullptr;
 
     // Delay Buffer
     //============================
@@ -74,22 +75,23 @@ private:
 
     float samplingPeriod;
     float samplingFrequency;
-    float depth{ 0.0f };
-    float feedback{ 0.0f }; // Feedback gain
+
 
     //LFO
     //============================
 
     float lfo(float phase, int waveform);
 
-    float freq{ 0.0f }; // LFO frequency
-    float sweep{ 0.0f }; // Sweep Width (i.e. LFO amplitude)
+
     float maxSweepWidth{ 10.0f };
 
     float phase{ 0.0f }; // istantaneous phase of the LFO
-    float phaseRL{ 0.0f }; // Phase offset between L&R channels
-    float delayTime{ 0.0f }; // Minimum Delay Time
+
     float maxDelayTime{ 10.0f };
     int waveform{ 1 };
     //============================
+
+
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessor)
 };

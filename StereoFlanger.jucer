@@ -1,43 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="Oi5mgB" name="StereoFlanger" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildVST3" version="1.2.1">
-  <MAINGROUP id="TZ0IGP" name="StereoFlanger">
-    <GROUP id="{EF626E12-32F5-8494-20D6-8C5C1150B1AA}" name="Source">
-      <FILE id="dF79yh" name="PluginProcessor.cpp" compile="1" resource="0"
+<JUCERPROJECT id="ePzdmp" name="StereoFlanger" projectType="audioplug" addUsingNamespaceToJuceHeader="0"
+              displaySplashScreen="1" jucerFormatVersion="1" binaryDataNamespace="BinaryData"
+              version="1.3.0">
+  <MAINGROUP id="L52eWc" name="StereoFlanger">
+    <GROUP id="{68207CBC-3A00-F812-EB50-035AD86E3BA9}" name="Resources">
+      <FILE id="OFaLSL" name="defaultflanger.xml" compile="0" resource="1"
+            file="Resources/defaultflanger.xml" xcodeResource="1"/>
+    </GROUP>
+    <GROUP id="{1AF890FA-2AD7-8C44-CB5F-AE4CE181B82A}" name="Source">
+      <FILE id="JMqChe" name="PresetListBox.h" compile="0" resource="0" file="Source/PresetListBox.h"/>
+      <FILE id="Mw4zXh" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
-      <FILE id="rtehZF" name="PluginProcessor.h" compile="0" resource="0"
+      <FILE id="QZOxLd" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
-      <FILE id="FA2Ep4" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="xvhcC0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
+               FOLEYS_SHOW_GUI_EDITOR_PALLETTE="0"/>
   <EXPORTFORMATS>
-    <VS2019 targetFolder="Builds/VisualStudio2019">
+    <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="StereoFlanger"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="StereoFlanger"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Flanger"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Flanger"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_audio_basics" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_core" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../JUCE/modules"/>
+        <MODULEPATH id="foleys_gui_magic" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2019 targetFolder="Builds/VisualStudio2019">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_product_unlocking" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_dsp" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="..\..\..\Documents\JUCE\modules"/>
+        <MODULEPATH id="foleys_gui_magic" path="..\..\..\Documents\GitHub"/>
       </MODULEPATHS>
     </VS2019>
   </EXPORTFORMATS>
   <MODULES>
+    <MODULE id="foleys_gui_magic" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
@@ -46,13 +80,19 @@
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
   </MODULES>
   <LIVE_SETTINGS>
-    <WINDOWS/>
+    <OSX/>
+    <WINDOWS buildEnabled="1"/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

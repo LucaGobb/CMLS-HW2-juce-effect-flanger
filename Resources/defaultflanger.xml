@@ -1,0 +1,110 @@
+<magic>
+  <Styles>
+    <Style name="default">
+      <Nodes/>
+      <Classes>
+        <plot-view border="2" background-color="black" border-color="silver" display="contents"/>
+        <nomargin margin="0" padding="0" border="0"/>
+        <group margin="5" padding="5" border="2" flex-direction="column"/>
+      </Classes>
+      <Types>
+        <Slider border="0" slider-textbox="textbox-below" lookAndFeel=""/>
+        <ToggleButton border="0" max-height="50" caption-size="0" text="Active"/>
+        <TextButton border="0" max-height="50" caption-size="0"/>
+        <ComboBox border="0" max-height="50" caption-size="0"/>
+        <Plot border="0" margin="0" padding="0" background-color="00000000"
+              radius="0"/>
+        <XYDragComponent border="0" margin="0" padding="0" background-color="00000000"
+                         radius="0"/>
+      </Types>
+      <Palettes>
+        <default/>
+      </Palettes>
+    </Style>
+  </Styles>
+  <View id="root" resizable="1" resize-corner="1" margin="0" caption-color=""
+        background-gradient="linear-gradient(0,0% ff471919,100% 0000F2FF)"
+        lookAndFeel="FoleysFinest" width="750" height="600" min-width="550" min-height="400" background-color="00000000"
+        border-color="00000000" background-alpha="0000F2FF">
+    <View flex-direction="column" margin="0" background-color="00000000"
+          background-gradient="">
+      <View id="plot-view" class="plot-view" background-color="00000000"
+            display="flexbox" repaint-hz="" flex-direction="column" margin="0"
+            caption="Analyser &amp; Oscilloscope" border="0" border-color="00000000"
+            caption-color="FF98AFB1">
+        <Plot source="analyser" plot-color="FF98AFB1" plot-inactive-color="FF000000"
+              plot-fill-color="00000000" plot-inactive-fill-color="" plot-decay=""
+              margin="0" background-color="00000000"/>
+        <Plot source="waveform" plot-color="FF98AFB1" plot-inactive-color="FF000000"
+              plot-inactive-fill-color="FF000000" plot-fill-color="00000000"
+              pos-x="0%" pos-y="0%" pos-width="100%" pos-height="100%" margin="0"
+              background-color="00000000" background-gradient=""/>
+      </View>
+      <View margin="" background-color="00000000" flex-direction="row">
+        <XYDragComponent parameter-x="sweep" parameter-y="frequency" background-color="00000000"
+                         border="" border-color="00000000" xy-crosshair="crosshair" xy-radius="5"
+                         caption="Amplitude-Freq X-Y" margin="5" xy-drag-handle="CD638083"
+                         xy-drag-handle-over="FF98AFB1" xy-horizontal="FF98AFB1" xy-horizontal-over="FF98AFB1"
+                         xy-vertical="FF527E89" xy-vertical-over="FF98AFB1" caption-color="FF98AFB1"/>
+        <XYDragComponent parameter-x="delay" parameter-y="feedback" background-color="00000000"
+                         lookAndFeel="FoleysFinest" tab-color="" background-gradient=""
+                         xy-horizontal="FF527F8A" xy-vertical="FF98AFB1" xy-horizontal-over="FF98AFB1"
+                         xy-vertical-over="FF98AFB1" xy-drag-handle-over="FF98AFB1" xy-drag-handle="CD638083"
+                         border-color="" margin="10" xy-radius="5" xy-crosshair="crosshair"
+                         caption="Delay-Feedback XY" caption-color="FF98AFB1"/>
+      </View>
+    </View>
+    <View class="parameters nomargin" padding="0" display="flexbox" flex-direction="column-reverse"
+          flex-wrap="nowrap" flex-align-content="stretch" background-color="00000000"
+          border="0" margin="10" background-alpha="0">
+      <View flex-direction="row" flex-grow="1.2" flex-shrink="1.0" flex-order="0"
+            flex-align-self="stretch" caption="" background-color="00000000"
+            background-alpha="0">
+        <Slider caption=" Delay [ms]" parameter="delay" slider-type="rotary"
+                background-color="00000000" rotary-outline="FF98AFB1" slider-background="FF98AFB1"
+                slider-thumb="FF98AFB1" slider-track="FF98AFB1" rotary-fill="FF527E89"
+                slider-text="FF98AFB1" slider-text-background="00000000" slider-text-outline="00000000"
+                caption-color="FF98AFB1" tooltip="" max-value="" min-value=""/>
+        <Slider caption="Feedback" parameter="feedback" slider-type="rotary"
+                background-color="00000000" rotary-outline="FF98AFB1" slider-background="FF98AFB1"
+                slider-thumb="FF98AFB1" slider-track="FF98AFB1" rotary-fill="FF527E89"
+                slider-text="FF98AFB1" slider-text-background="00000000" slider-text-outline="00000000"
+                caption-color="FF98AFB1"/>
+        <Slider caption="Mix" parameter="depth" slider-type="rotary" background-color="00000000"
+                rotary-outline="FF98AFB1" slider-track="FF98AFB1" slider-background="FF98AFB1"
+                rotary-fill="FF527E89" slider-thumb="" slider-text="FF98AFB1"
+                slider-text-background="00000000" slider-text-outline="00000000"
+                caption-color="FF98AFB1"/>
+      </View>
+      <View flex-direction="row" background-color="00000000" min-height="0.0"
+            caption="LFO Controls" background-alpha="" margin="" caption-color="FF98AFB1">
+        <Slider slider-text-outline="00000000" slider-text-background="00000000"
+                slider-text="FF98AFB1" rotary-fill="FF527E89" slider-background="FF98AFB1"
+                lookAndFeel="FoleysFinest" caption="Frequency [Hz]" parameter="frequency"
+                rotary-outline="FF98AFB1" caption-color="FF98AFB1" slider-thumb="FF98AFB1"
+                slider-track="FF98AFB1" background-color="00000000" slider-type="rotary"/>
+        <Slider caption="Phase" parameter="phase" slider-type="rotary" background-color="00000000"
+                rotary-outline="FF98AFB1" rotary-fill="FF527E89" slider-background="FF98AFB1"
+                slider-thumb="FF98AFB1" slider-track="FF98AFB1" slider-text="FF98AFB1"
+                slider-text-background="00000000" slider-text-outline="0098AFB1"
+                caption-color="FF98AFB1"/>
+        <Slider caption="Amplitude" parameter="sweep" slider-type="rotary" background-color="00000000"
+                rotary-outline="FF98AFB1" slider-background="FF98AFB1" slider-thumb="FF98AFB1"
+                slider-track="FF98AFB1" rotary-fill="FF527E89" slider-text="FF98AFB1"
+                slider-text-background="00000000" slider-text-outline="00000000"
+                caption-color="FF98AFB1"/>
+      </View>
+    </View>
+    <View width="" min-width="0.0" max-width="120" flex-direction="column"
+          background-color="008B1515" lookAndFeel="FoleysFinest" flex-wrap="nowrap">
+      <ListBox margin="0" padding="0" list-box-model="presets" background-color="00000000"
+               lookAndFeel="FoleysFinest" max-height="200" min-height="10" caption-color="FF000000"
+               background-alpha=""/>
+      <TextButton margin="0" padding="1" onClick="save-preset" text="Save" background-color="00000000"
+                  background-gradient="" border-color="00000000" max-height="40"
+                  min-height="0.0"/>
+      <Plot source="waveform" plot-color="00000000" background-color="00000000"
+            lookAndFeel="FoleysFinest" plot-fill-color="FF96B2B2"/>
+    </View>
+  </View>
+</magic>

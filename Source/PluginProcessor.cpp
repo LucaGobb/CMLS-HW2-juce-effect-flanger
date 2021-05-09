@@ -1,115 +1,143 @@
+
+/*
+  ==============================================================================
+    This file was auto-generated!
+    It contains the basic framework code for a JUCE plugin processor.
+  ==============================================================================
+*/
+
+
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "PresetListBox.h"
+#include "./../JuceLibraryCode/BinaryData.h"
 
-#include <math.h>
-#define M_PI 3.14159 26536 //dovrebbe essere gi� incluso in <math.h>
 
-//==============================================================================
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-    : AudioProcessor(BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
-#endif
-        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#endif
-    )
-#endif
-{
+        : treeState(*this, nullptr, ProjectInfo::projectName, {
+
+
+        std::make_unique<juce::AudioParameterFloat>("depth",            // parameterID
+                                                    "Depth",            // parameter name
+                                                    juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f ),
+                                                    0.7f),// default value
+        std::make_unique<juce::AudioParameterFloat>("phase",      // parameterID
+                                                    "Phase",     // parameter name
+                                                    juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f ),
+                                                    0.5f),   // default value
+        std::make_unique<juce::AudioParameterFloat>("frequency",            // parameterID
+                                                    "Frequency",            // parameter name
+                                                    juce::NormalisableRange<float> (0.01f, 10.0f, 0.001f , 0.150),
+                                                    1.0f),             // default value
+        std::make_unique<juce::AudioParameterFloat>("delay",      // parameterID
+                                                    "Delay",     // parameter name
+                                                    juce::NormalisableRange<float> (0.10f, 7.0f, 0.01f ),
+                                                    2.5f),   // default value
+        std::make_unique<juce::AudioParameterFloat>("feedback",            // parameterID
+                                                    "Feedback",            // parameter name
+                                                    juce::NormalisableRange<float> (0.0f, 0.99f, 0.01f),
+                                                    0.8f),             // default value
+        std::make_unique<juce::AudioParameterFloat>("sweep",      // parameterID
+                                                    "Sweep",     // parameter name
+                                                    juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f),
+                                                    0.5f),   // default value
+
+
+
+
+
+}) {
+    phaseRL = treeState.getRawParameterValue("phase");
+    depth = treeState.getRawParameterValue("depth");
+    freq = treeState.getRawParameterValue("frequency");
+    delayTime = treeState.getRawParameterValue("delay");
+    feedback = treeState.getRawParameterValue("feedback");
+    sweep = treeState.getRawParameterValue("sweep");
+
+
+
+    auto defaultGUI = magicState.createDefaultGUITree();
+    magicState.setGuiValueTree(defaultGUI);
+
+    auto file = juce::File::getSpecialLocation(juce::File::currentApplicationFile)
+            .getChildFile("Contents")
+            .getChildFile("Resources")
+            .getChildFile("defaultflanger.xml");
+
+    if (file.existsAsFile())
+        magicState.setGuiValueTree(file);
+    else
+        magicState.setGuiValueTree(BinaryData::defaultflanger_xml,
+                                   BinaryData::defaultflanger_xmlSize
+                                   );
+
+
+    // MAGIC GUI: add a meter at the output
+    outputMeter = magicState.createAndAddObject<foleys::MagicLevelSource>("output");
+    oscilloscope = magicState.createAndAddObject<foleys::MagicOscilloscope>("waveform");
+
+    analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("analyser");
+    magicState.addBackgroundProcessing(analyser);
+
+    presetList = magicState.createAndAddObject<PresetListBox>("presets");
+    presetList->onSelectionChanged = [&](int number) {
+        loadPresetInternal(number);
+    };
+
+
+    magicState.addTrigger("save-preset", [this] {
+        savePresetInternal();
+    });
+
+    magicState.setApplicationSettingsFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
+                                                  .getChildFile(ProjectInfo::companyName)
+                                                  .getChildFile(ProjectInfo::projectName + juce::String(".settings")));
+
+    magicState.setPlayheadUpdateFrequency(30);
+
+
 
 }
 
-StereoFlangerAudioProcessor::~StereoFlangerAudioProcessor()
-{
-}
 
 //==============================================================================
-const juce::String StereoFlangerAudioProcessor::getName() const
+void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int blockSize)
 {
-    return JucePlugin_Name;
-}
+    // Use this method as the place to do any pre-playback
+    // initialisation that you need..
 
-bool StereoFlangerAudioProcessor::acceptsMidi() const
-{
-#if JucePlugin_WantsMidiInput
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool StereoFlangerAudioProcessor::producesMidi() const
-{
-#if JucePlugin_ProducesMidiOutput
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool StereoFlangerAudioProcessor::isMidiEffect() const
-{
-#if JucePlugin_IsMidiEffect
-    return true;
-#else
-    return false;
-#endif
-}
-
-double StereoFlangerAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int StereoFlangerAudioProcessor::getNumPrograms()
-{
-    return 1;
-}
-
-int StereoFlangerAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void StereoFlangerAudioProcessor::setCurrentProgram(int index)
-{
-}
-
-const juce::String StereoFlangerAudioProcessor::getProgramName(int index)
-{
-    return {};
-}
-
-void StereoFlangerAudioProcessor::changeProgramName(int index, const juce::String& newName)
-{
-}
-
-//==============================================================================
-void StereoFlangerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
-{
     //buffer inizialization:
     //   (delay minimum + sweep) in samples + 1 sample for interpolation
 
-    delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + samplesPerBlock; // todo: do more parametric
+    delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + blockSize; // todo: do more parametric
     dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
     samplingFrequency = sampleRate;
     //samplingPeriod = 1 / sampleRate;
+
+
+    // MAGIC GUI: setup the output meter
+    outputMeter->setupSource (getTotalNumOutputChannels(), sampleRate, 500, 200);
+    oscilloscope->prepareToPlay (sampleRate, blockSize);
+    analyser->prepareToPlay (sampleRate, blockSize);
 }
 
 void StereoFlangerAudioProcessor::releaseResources()
 {
+    // When playback stops, you can use this as an opportunity to free up any
+    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool StereoFlangerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool StereoFlangerAudioProcessor::isBusesLayoutSupported (const juce::AudioProcessor::BusesLayout& layouts) const
 {
 #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused(layouts);
+    ignoreUnused (layouts);
     return true;
 #else
+    // This is the place where you check if the layout is supported.
+    // In this template code we only support mono or stereo.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
         && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
@@ -125,14 +153,31 @@ bool StereoFlangerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layo
 }
 #endif
 
-void StereoFlangerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
+    auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    // MAGIC GUI: send midi messages to the keyboard state and MidiLearn
+    magicState.processMidiBuffer (midiMessages, buffer.getNumSamples(), true);
+
+    // MAGIC GUI: send playhead information to the GUI
+    magicState.updatePlayheadInformation (getPlayHead());
+
+    // In case we have more outputs than inputs, this code clears any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    // This is here to avoid people getting screaming feedback
+    // when they first compile a plugin, but obviously you don't need to keep
+    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
+        buffer.clear (i, 0, buffer.getNumSamples());
+
+
+
+    for (int i = 1; i < buffer.getNumChannels(); ++i)
+        buffer.copyFrom (i, 0, buffer.getReadPointer (0), buffer.getNumSamples());
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
@@ -142,14 +187,14 @@ void StereoFlangerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     int numSamples = buffer.getNumSamples();
 
     // freeze variables
-    float depth_ = depth; // values: from 0 to 1
-    float fb_now = feedback; // 0 to 0.9
-    float sweep_sample = sweep * getSampleRate() * 0.01f; // sweep: 0 to 1
-    int waveform_ = waveform;
+    float depth_ = *depth; // values: from 0 to 1
+    float fb_now = *feedback; // 0 to 0.9
+    float sweep_sample = *sweep * getSampleRate() * 0.01f; // sweep: 0 to 1
+    int waveform_ = 4;
 
-    float freq_now = freq;
-    float delay_min_sample = delayTime * 0.001f * getSampleRate(); // 0 to 5 [ms]
-    float phaseRL_now = phaseRL;
+    float freq_now = *freq;
+    float delay_min_sample = *delayTime * 0.001f * getSampleRate(); // 0 to 5 [ms]
+    float phaseRL_now = *phaseRL;
 
 
     float* channelOutDataL = buffer.getWritePointer(0);
@@ -171,6 +216,7 @@ void StereoFlangerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         drR = fmodf((float)dw - (float)(currentDelayR)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
 
         // Linear interpolation
+
         float fractionL = drL - floorf(drL);
         float fractionR = drR - floorf(drR);
         int previousSampleL = (int)floorf(drL);
@@ -195,28 +241,40 @@ void StereoFlangerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
             phase -= 1.0;
     }
 
+    // MAGIC GUI: send the finished buffer to the level meter
+    outputMeter->pushSamples (buffer);
+    oscilloscope->pushSamples (buffer);
+    analyser->pushSamples (buffer);
 }
 
 //==============================================================================
-bool StereoFlangerAudioProcessor::hasEditor() const
+void StereoFlangerAudioProcessor::savePresetInternal()
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    presetNode = magicState.getSettings().getOrCreateChildWithName ("presets", nullptr);
+
+    juce::ValueTree preset { "Preset" };
+    preset.setProperty ("name", "Preset " + juce::String (presetNode.getNumChildren() + 1), nullptr);
+
+    foleys::ParameterManager manager (*this);
+    manager.saveParameterValues (preset);
+
+    presetNode.appendChild (preset, nullptr);
 }
 
-
-juce::AudioProcessorEditor* StereoFlangerAudioProcessor::createEditor()
+void StereoFlangerAudioProcessor::loadPresetInternal(int index)
 {
-    return new StereoFlangerAudioProcessorEditor(*this);
-}
+    presetNode = magicState.getSettings().getOrCreateChildWithName ("presets", nullptr);
+    auto preset = presetNode.getChild (index);
 
+    foleys::ParameterManager manager (*this);
+    manager.loadParameterValues (preset);
+}
 
 //==============================================================================
-void StereoFlangerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
-{
-}
 
-void StereoFlangerAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+double StereoFlangerAudioProcessor::getTailLengthSeconds() const
 {
+    return 0.0;
 }
 
 //==============================================================================
@@ -226,69 +284,33 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new StereoFlangerAudioProcessor();
 }
 
-//The functions that will be used by the Editor to update slider values
-//==========================================
-void StereoFlangerAudioProcessor::set_sweep(float val)
-{
-    sweep = val;
-}
-
-void StereoFlangerAudioProcessor::set_depth(float val)
-{
-    depth = val;
-}
-
-void StereoFlangerAudioProcessor::set_delayTime(float val)
-{
-    delayTime = val;
-}
-
-void StereoFlangerAudioProcessor::set_feedback(float val)
-{
-    feedback = val;
-}
-
-void StereoFlangerAudioProcessor::set_freq(float val)
-{
-    freq = val;
-}
-
-void StereoFlangerAudioProcessor::set_phase(float val)
-{
-    phaseRL = val;
-}
-
-void StereoFlangerAudioProcessor::set_wave(int val)
-{
-    waveform = val;
-}
-
 float StereoFlangerAudioProcessor::lfo(float phase, int waveform)
 {
     switch (waveform)
     {
-    case 1: // Triangle
-        if (phase < 0.25f)
-            return 0.5f + 2.0f * phase;
-        else if (phase < 0.75f)
-            return 1.0f - 2.0f * (phase - 0.25f);
-        else
-            return 2.0f * (phase - 0.75f);
-    case 2: // Square
-        if (phase < 0.5f)
-            return 1.0f;
-        else
-            return 0.0f;
-    case 3: // Sawtooth
-        if (phase < 0.5f)
-            return 0.5f + phase;
-        else
-            return phase - 0.5f;
-    case 4: // Sin
-    default:
-        return 0.5f + 0.5f * sinf(2.0 * 3.1416 * phase);
+        case 1: // Triangle
+            if (phase < 0.25f)
+                return 0.5f + 2.0f * phase;
+            else if (phase < 0.75f)
+                return 1.0f - 2.0f * (phase - 0.25f);
+            else
+                return 2.0f * (phase - 0.75f);
+        case 2: // Square
+            if (phase < 0.5f)
+                return 1.0f;
+            else
+                return 0.0f;
+        case 3: // Sawtooth
+            if (phase < 0.5f)
+                return 0.5f + phase;
+            else
+                return phase - 0.5f;
+        case 4: // Sin
+        default:
+            return 0.5f + 0.5f * sinf(2.0 * 3.1416 * phase);
     }
 }
 
 
 //==========================================
+
