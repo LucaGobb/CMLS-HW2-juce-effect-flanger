@@ -123,7 +123,8 @@ void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int blockSiz
     //buffer inizialization:
     //   (delay minimum + sweep) in samples + 1 sample for interpolation
 
-    delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + blockSize; // todo: do more parametric
+    delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + 3;
+    // delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + blockSize;
     dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
@@ -170,8 +171,6 @@ bool StereoFlangerAudioProcessor::isBusesLayoutSupported (const juce::AudioProce
 void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     // MAGIC GUI: send midi messages to the keyboard state and MidiLearn
     magicState.processMidiBuffer (midiMessages, buffer.getNumSamples(), true);
@@ -179,24 +178,24 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // MAGIC GUI: send playhead information to the GUI
     magicState.updatePlayheadInformation (getPlayHead());
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-
-
-    for (int i = 1; i < buffer.getNumChannels(); ++i)
-        buffer.copyFrom (i, 0, buffer.getReadPointer (0), buffer.getNumSamples());
-
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer(channel);
-    }
+    // // In case we have more outputs than inputs, this code clears any output
+    // // channels that didn't contain input data, (because these aren't
+    // // guaranteed to be empty - they may contain garbage).
+    // // This is here to avoid people getting screaming feedback
+    // // when they first compile a plugin, but obviously you don't need to keep
+    // // this code if your algorithm always overwrites all the output channels.
+    // auto totalNumInputChannels  = getTotalNumInputChannels();
+    // auto totalNumOutputChannels = getTotalNumOutputChannels();
+    // for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+    //     buffer.clear (i, 0, buffer.getNumSamples());
+    //
+    // for (int i = 1; i < buffer.getNumChannels(); ++i)
+    //     buffer.copyFrom (i, 0, buffer.getReadPointer (0), buffer.getNumSamples());
+    //
+    // for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    // {
+    //     auto* channelData = buffer.getWritePointer(channel);
+    // }
 
     int numSamples = buffer.getNumSamples();
 
@@ -206,6 +205,7 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     float sweep_sample = *sweep * getSampleRate() * 0.01f; // sweep: 0 to 1
     int waveform_ = (int)*lfoWaveType;
     bool isPhaseInverted = (bool)*phaseSwitch;
+    int sign = (isPhaseInverted) ? -1 : 1;
 
     float freq_now = *freq;
     float delay_min_sample = *delayTime * 0.001f * getSampleRate(); // 0 to 5 [ms]
@@ -224,30 +224,63 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         float interpolatedSampleR = 0.0;
 
         float currentDelayL = delay_min_sample + sweep_sample * lfo(phase,waveform_);
-        float currentDelayR = delay_min_sample + sweep_sample * lfo(phase + phaseRL_now,waveform_);
-
+        float currentDelayR = delay_min_sample + sweep_sample * lfo(fmodf(phase + phaseRL_now, 1.0f),waveform_);
         // delay in sample
         drL = fmodf((float)dw - (float)(currentDelayL)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
         drR = fmodf((float)dw - (float)(currentDelayR)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
 
-        // Linear interpolation
-
+        // interpolation
         float fractionL = drL - floorf(drL);
         float fractionR = drR - floorf(drR);
-        int previousSampleL = (int)floorf(drL);
-        int previousSampleR = (int)floorf(drR);
-        int nextSampleL = (previousSampleL + 1) % delayBufferLength;
-        int nextSampleR = (previousSampleR + 1) % delayBufferLength;
-        interpolatedSampleL = fractionL * dbuf.getSample(0, nextSampleL) + (1.0f - fractionL) * dbuf.getSample(0, previousSampleL);
-        interpolatedSampleR = fractionR * dbuf.getSample(1, nextSampleR) + (1.0f - fractionR) * dbuf.getSample(1, previousSampleR);
+
+        // // Linear interpolation
+        //
+        // int previousSampleL = (int)floorf(drL);
+        // int previousSampleR = (int)floorf(drR);
+        // int nextSampleL = (previousSampleL + 1) % delayBufferLength;
+        // int nextSampleR = (previousSampleR + 1) % delayBufferLength;
+        // interpolatedSampleL = fractionL * dbuf.getSample(0, nextSampleL) + (1.0f - fractionL) * dbuf.getSample(0, previousSampleL);
+        // interpolatedSampleR = fractionR * dbuf.getSample(1, nextSampleR) + (1.0f - fractionR) * dbuf.getSample(1, previousSampleR);
+
+        // Cubic interpolation
+
+        float frsqL = fractionL*fractionL;
+        int sample1L = (int)floorf(drL);
+        int sample2L = (sample1L + 1) % delayBufferLength;
+        int sample3L = (sample2L + 1) % delayBufferLength;
+        int sample0L = (sample1L - 1 + delayBufferLength) % delayBufferLength;
+
+        float frsqR = fractionR*fractionR;
+        int sample1R = (int)floorf(drR);
+        int sample2R = (sample1R + 1) % delayBufferLength;
+        int sample3R = (sample2R + 1) % delayBufferLength;
+        int sample0R = (sample1R - 1 + delayBufferLength) % delayBufferLength;
+
+        float a0L = -0.5f*dbuf.getSample(0, sample0L) + 1.5f*dbuf.getSample(0, sample1L)
+                            - 1.5f*dbuf.getSample(0, sample2L) + 0.5f*dbuf.getSample(0, sample3L);
+        float a1L = dbuf.getSample(0, sample0L) - 2.5f*dbuf.getSample(0, sample1L)
+                    + 2.0f*dbuf.getSample(0, sample2L) - 0.5f*dbuf.getSample(0, sample3L);
+        float a2L = -0.5f*dbuf.getSample(0, sample0L) + 0.5f*dbuf.getSample(0, sample2L);
+        float a3L = dbuf.getSample(0, sample1L);
+
+        interpolatedSampleL = a0L*fractionL*frsqL + a1L*frsqL + a2L*fractionL + a3L;
+
+        float a0R = -0.5f*dbuf.getSample(1, sample0R) + 1.5f*dbuf.getSample(1, sample1R)
+                            - 1.5f*dbuf.getSample(1, sample2R) + 0.5f*dbuf.getSample(1, sample3R);
+        float a1R = dbuf.getSample(1, sample0R) - 2.5f*dbuf.getSample(1, sample1R)
+                    + 2.0f*dbuf.getSample(1, sample2R) - 0.5f*dbuf.getSample(1, sample3R);
+        float a2R = -0.5f*dbuf.getSample(1, sample0R) + 0.5f*dbuf.getSample(1, sample2R);
+        float a3R = dbuf.getSample(1, sample1R);
+
+        interpolatedSampleR = a0R*fractionR*frsqR + a1R*frsqR + a2R*fractionR + a3R;
 
 
         // Feedback
         dbuf.setSample(0, dw, channelInDataL[i] + interpolatedSampleL * fb_now);
         dbuf.setSample(1, dw, channelInDataR[i] + interpolatedSampleR * fb_now);
 
-        channelOutDataL[i] = channelInDataL[i] + depth_ * interpolatedSampleL;
-        channelOutDataR[i] = channelInDataR[i] + depth_ * interpolatedSampleR;
+        channelOutDataL[i] = channelInDataL[i] + sign * depth_ * interpolatedSampleL;
+        channelOutDataR[i] = channelInDataR[i] + sign * depth_ * interpolatedSampleR;
 
         dw = (dw + 1) % delayBufferLength;
 
@@ -330,4 +363,3 @@ float StereoFlangerAudioProcessor::lfo(float phase, int waveform)
 
 
 //==========================================
-
