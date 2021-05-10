@@ -53,6 +53,8 @@ private:
     std::atomic<float>* delayTime  = nullptr;
     std::atomic<float>* feedback = nullptr;
     std::atomic<float>* sweep  = nullptr;
+    std::atomic<float>* phaseSwitch = nullptr;
+    std::atomic<float>* lfoWaveType = nullptr;
 
 
     juce::ValueTree  presetNode;
@@ -94,4 +96,5 @@ private:
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoFlangerAudioProcessor)
+    int TRANS;
 };

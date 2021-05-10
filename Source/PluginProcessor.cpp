@@ -13,6 +13,12 @@
 #include "./../JuceLibraryCode/BinaryData.h"
 
 
+
+static juce::String waveformType {"lfoWaveType"};
+
+
+
+
 StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
         : treeState(*this, nullptr, ProjectInfo::projectName, {
 
@@ -42,6 +48,11 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
                                                     juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f),
                                                     0.5f),   // default value
 
+        std::make_unique<juce::AudioParameterBool> ("invertPhase",      // parameterID
+                                                    "Invert Phase",     // parameter name
+                                                    false),              // default value
+
+        std::make_unique<juce::AudioParameterChoice>(waveformType, "Type", juce::StringArray ("Sine", "Square", "Sawtooth", "Triangle"), 0)
 
 
 
@@ -53,6 +64,9 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
     delayTime = treeState.getRawParameterValue("delay");
     feedback = treeState.getRawParameterValue("feedback");
     sweep = treeState.getRawParameterValue("sweep");
+    phaseSwitch = treeState.getRawParameterValue ("invertPhase");
+    lfoWaveType = treeState.getRawParameterValue("lfoWaveType");
+
 
 
 
@@ -190,7 +204,8 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     float depth_ = *depth; // values: from 0 to 1
     float fb_now = *feedback; // 0 to 0.9
     float sweep_sample = *sweep * getSampleRate() * 0.01f; // sweep: 0 to 1
-    int waveform_ = 4;
+    int waveform_ = (int)*lfoWaveType;
+    bool isPhaseInverted = (bool)*phaseSwitch;
 
     float freq_now = *freq;
     float delay_min_sample = *delayTime * 0.001f * getSampleRate(); // 0 to 5 [ms]
@@ -288,26 +303,28 @@ float StereoFlangerAudioProcessor::lfo(float phase, int waveform)
 {
     switch (waveform)
     {
-        case 1: // Triangle
+        case 0:
+            // Sine
+        default:
+            return 0.5f + 0.5f * sinf(2.0 * 3.1416 * phase);
+
+        case 1: // Square
+            if (phase < 0.5f)
+                return 1.0f;
+            else
+                return 0.0f;
+        case 2: // Sawtooth
+            if (phase < 0.5f)
+                return 0.5f + phase;
+            else
+                return phase - 0.5f;
+        case 3: // Triangle
             if (phase < 0.25f)
                 return 0.5f + 2.0f * phase;
             else if (phase < 0.75f)
                 return 1.0f - 2.0f * (phase - 0.25f);
             else
                 return 2.0f * (phase - 0.75f);
-        case 2: // Square
-            if (phase < 0.5f)
-                return 1.0f;
-            else
-                return 0.0f;
-        case 3: // Sawtooth
-            if (phase < 0.5f)
-                return 0.5f + phase;
-            else
-                return phase - 0.5f;
-        case 4: // Sin
-        default:
-            return 0.5f + 0.5f * sinf(2.0 * 3.1416 * phase);
     }
 }
 
