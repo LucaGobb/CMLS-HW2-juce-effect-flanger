@@ -76,13 +76,13 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
     auto file = juce::File::getSpecialLocation(juce::File::currentApplicationFile)
             .getChildFile("Contents")
             .getChildFile("Resources")
-            .getChildFile("defaultflanger.xml");
+            .getChildFile("newnewdefaultflanger.xml");
 
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        magicState.setGuiValueTree(BinaryData::defaultflanger_xml,
-                                   BinaryData::defaultflanger_xmlSize
+        magicState.setGuiValueTree(BinaryData::newnewdefaultflanger_xml,
+                                   BinaryData::newnewdefaultflanger_xmlSize
                                    );
 
 
@@ -225,16 +225,17 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
         float currentDelayL = delay_min_sample + sweep_sample * lfo(phase,waveform_);
         float currentDelayR = delay_min_sample + sweep_sample * lfo(fmodf(phase + phaseRL_now, 1.0f),waveform_);
+
         // delay in sample
         drL = fmodf((float)dw - (float)(currentDelayL)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
         drR = fmodf((float)dw - (float)(currentDelayR)+(float)delayBufferLength - 1.0f, (float)delayBufferLength);
 
         // interpolation
+
         float fractionL = drL - floorf(drL);
         float fractionR = drR - floorf(drR);
 
-        // // Linear interpolation
-        //
+        // Linear interpolation
         // int previousSampleL = (int)floorf(drL);
         // int previousSampleR = (int)floorf(drR);
         // int nextSampleL = (previousSampleL + 1) % delayBufferLength;
@@ -273,7 +274,6 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         float a3R = dbuf.getSample(1, sample1R);
 
         interpolatedSampleR = a0R*fractionR*frsqR + a1R*frsqR + a2R*fractionR + a3R;
-
 
         // Feedback
         dbuf.setSample(0, dw, channelInDataL[i] + interpolatedSampleL * fb_now);

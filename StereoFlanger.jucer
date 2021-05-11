@@ -2,11 +2,11 @@
 
 <JUCERPROJECT id="ePzdmp" name="StereoFlanger" projectType="audioplug" addUsingNamespaceToJuceHeader="0"
               displaySplashScreen="1" jucerFormatVersion="1" binaryDataNamespace="BinaryData"
-              version="1.3.0">
+              version="2.0.0">
   <MAINGROUP id="L52eWc" name="StereoFlanger">
     <GROUP id="{68207CBC-3A00-F812-EB50-035AD86E3BA9}" name="Resources">
-      <FILE id="OFaLSL" name="defaultflanger.xml" compile="0" resource="1"
-            file="Resources/defaultflanger.xml" xcodeResource="1"/>
+      <FILE id="zDtOIQ" name="newnewdefaultflanger.xml" compile="0" resource="1"
+            file="Resources/newnewdefaultflanger.xml" xcodeResource="1"/>
     </GROUP>
     <GROUP id="{1AF890FA-2AD7-8C44-CB5F-AE4CE181B82A}" name="Source">
       <FILE id="JMqChe" name="PresetListBox.h" compile="0" resource="0" file="Source/PresetListBox.h"/>
@@ -41,7 +41,7 @@
         <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
         <MODULEPATH id="juce_product_unlocking" path="../JUCE/modules"/>
         <MODULEPATH id="juce_cryptography" path="../JUCE/modules"/>
-        <MODULEPATH id="foleys_gui_magic" path="../JUCE/modules"/>
+        <MODULEPATH id="foleys_gui_magic" path="..\..\GitHub"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2019 targetFolder="Builds/VisualStudio2019">
@@ -50,23 +50,23 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_product_unlocking" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_opengl" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_extra" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_basics" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_graphics" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_events" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_dsp" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_data_structures" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_cryptography" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_core" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_utils" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_processors" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_formats" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_devices" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_basics" path="..\..\..\Documents\JUCE\modules"/>
-        <MODULEPATH id="foleys_gui_magic" path="..\..\..\Documents\GitHub"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../juce"/>
+        <MODULEPATH id="juce_opengl" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_dsp" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="foleys_gui_magic" path="..\..\GitHub"/>
       </MODULEPATHS>
     </VS2019>
   </EXPORTFORMATS>
@@ -93,6 +93,6 @@
   </MODULES>
   <LIVE_SETTINGS>
     <OSX/>
-    <WINDOWS buildEnabled="1"/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>
