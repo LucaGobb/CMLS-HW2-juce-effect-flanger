@@ -117,19 +117,15 @@ StereoFlangerAudioProcessor::StereoFlangerAudioProcessor()
 //==============================================================================
 void StereoFlangerAudioProcessor::prepareToPlay (double sampleRate, int blockSize)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
 
     //buffer inizialization:
-    //   (delay minimum + sweep) in samples + 1 sample for interpolation
+    //   (delay minimum + sweep) in samples + 3 sample for interpolation
 
-    delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + 3;
-    // delayBufferLength = (int)((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + blockSize;
+    delayBufferLength = (int)ceil((maxDelayTime + maxSweepWidth) * 0.001f * sampleRate) + 3;
     dbuf.setSize(getTotalNumOutputChannels(), delayBufferLength);
     dbuf.clear();
 
     samplingFrequency = sampleRate;
-    //samplingPeriod = 1 / sampleRate;
 
 
     // MAGIC GUI: setup the output meter
@@ -172,30 +168,10 @@ void StereoFlangerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 {
     juce::ScopedNoDenormals noDenormals;
 
-    // MAGIC GUI: send midi messages to the keyboard state and MidiLearn
-    magicState.processMidiBuffer (midiMessages, buffer.getNumSamples(), true);
-
+    
     // MAGIC GUI: send playhead information to the GUI
     magicState.updatePlayheadInformation (getPlayHead());
 
-    // // In case we have more outputs than inputs, this code clears any output
-    // // channels that didn't contain input data, (because these aren't
-    // // guaranteed to be empty - they may contain garbage).
-    // // This is here to avoid people getting screaming feedback
-    // // when they first compile a plugin, but obviously you don't need to keep
-    // // this code if your algorithm always overwrites all the output channels.
-    // auto totalNumInputChannels  = getTotalNumInputChannels();
-    // auto totalNumOutputChannels = getTotalNumOutputChannels();
-    // for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-    //     buffer.clear (i, 0, buffer.getNumSamples());
-    //
-    // for (int i = 1; i < buffer.getNumChannels(); ++i)
-    //     buffer.copyFrom (i, 0, buffer.getReadPointer (0), buffer.getNumSamples());
-    //
-    // for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    // {
-    //     auto* channelData = buffer.getWritePointer(channel);
-    // }
 
     int numSamples = buffer.getNumSamples();
 
